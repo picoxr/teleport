@@ -59,6 +59,7 @@ public class Pvr_ControllerInit : MonoBehaviour {
         Pvr_ControllerManager.SetControllerAbilityEvent -= CheckControllerStateOfAbility;
         Pvr_ControllerManager.ControllerStatusChangeEvent -= CheckControllerStateForGoblin;
     }
+
     private void ServiceStartSuccess()
     {
         var type = Controller.UPvr_GetDeviceType();

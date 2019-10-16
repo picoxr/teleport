@@ -1,10 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-// Copyright 2015-2017  Pico Technology Co., Ltd. All Rights 
-// File: Pvr_UnitySDKSensor
-// Author: AiLi.Shang
-// Date:  2017/01/13
-// Discription: Be fully careful of  Code modification
-///////////////////////////////////////////////////////////////////////////////
 #if !UNITY_EDITOR
 #if UNITY_ANDROID
 #define ANDROID_DEVICE
@@ -20,7 +13,6 @@ using UnityEngine;
 
 public class Pvr_UnitySDKRender
 {
-
     public Pvr_UnitySDKRender()
     {
         if (!canConnecttoActivity)
@@ -71,13 +63,6 @@ public class Pvr_UnitySDKRender
         }
         else
             Debug.LogError("Init Render Ability Failed!");
-        //if (canConnecttoActivity && !isInitrenderThread)
-        //{
-        //    Pvr_UnitySDKPluginEvent.Issue(RenderEventType.InitRenderThread);
-        //    isInitrenderThread = true;
-        //    Debug.Log("InitRenderThread on");
-        //}
-
     }
 
 
@@ -85,6 +70,16 @@ public class Pvr_UnitySDKRender
     {
         if (canConnecttoActivity && !isInitrenderThread)
         {
+            ColorSpace colorSpace = QualitySettings.activeColorSpace;
+            if (colorSpace == ColorSpace.Gamma)
+            {
+                Pvr_UnitySDKAPI.Render.UPvr_SetColorspaceType(0);
+            }
+            else if (colorSpace == ColorSpace.Linear)
+            {
+                Pvr_UnitySDKAPI.Render.UPvr_SetColorspaceType(1);
+            }
+
             Pvr_UnitySDKPluginEvent.Issue(RenderEventType.InitRenderThread);
             isInitrenderThread = true;
             Debug.Log("IssueRenderThread end");
@@ -109,7 +104,7 @@ public class Pvr_UnitySDKRender
         prefinger1 = finger1;
         prefinger2 = finger2;
     }
-    
+
     public Vector2 GetEyeBufferResolution()
     {
         Vector2 eyeBufferResolution;
@@ -142,7 +137,7 @@ public class Pvr_UnitySDKRender
         return eyeBufferResolution;
     }
 
-    
+
     public float GetEyeFOV()
     {
         float fov = 102;
@@ -168,10 +163,9 @@ public class Pvr_UnitySDKRender
         return true;
     }
 
-    
+
     public void ConnectToAndriod()
     {
-
 #if ANDROID_DEVICE
         try
         {      
@@ -224,7 +218,7 @@ public class Pvr_UnitySDKRender
     #endregion
 
     /************************************  Private Interfaces **********************************/
-    #region     PrivateInterfaces
+    #region     Private Interfaces
     private bool UpdateRenderParaFrame()
     {
         Pvr_UnitySDKManager.SDK.EyeFov = GetEyeFOV();
@@ -268,24 +262,6 @@ public class Pvr_UnitySDKRender
         }
 
     }
-
-    //private void ConfigureOverlayBuffer(int index, Vector2 Size)
-    //{
-    //    int x = (int)Size.x;
-    //    int y = (int)Size.y;
-    //    Pvr_UnitySDKManager.SDK.overlayTextures[index] = new RenderTexture(x, y, (int)Pvr_UnitySDKManager.SDK.RtBitDepth, Pvr_UnitySDKManager.SDK.RtFormat);
-    //    Pvr_UnitySDKManager.SDK.overlayTextures[index].anisoLevel = 0;
-    //    Pvr_UnitySDKManager.SDK.overlayTextures[index].antiAliasing = Mathf.Max(QualitySettings.antiAliasing, (int)Pvr_UnitySDKManager.SDK.RtAntiAlising);
-
-    //    Pvr_UnitySDKManager.SDK.overlayTextures[index].Create();
-    //    if (Pvr_UnitySDKManager.SDK.overlayTextures[index].IsCreated())
-    //    {
-    //        Pvr_UnitySDKManager.SDK.overlayTextureIds[index] = Pvr_UnitySDKManager.SDK.overlayTextures[index].GetNativeTexturePtr().ToInt32();
-    //        Debug.LogFormat("overlayTextureIndex : {0:D}, id : {0:D}", index, Pvr_UnitySDKManager.SDK.overlayTextureIds[index]);
-    //    }
-
-    //}
-
 
     private bool CreateEyeBuffer()
     {

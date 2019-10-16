@@ -16,8 +16,7 @@ namespace Pvr_UnitySDKAPI
 }
 
 public class Pvr_ControllerVisual : MonoBehaviour
-{
-    
+{    
     public ControllerDevice currentDevice;
     
     public Texture2D m_idle;
@@ -38,18 +37,17 @@ public class Pvr_ControllerVisual : MonoBehaviour
         controllerRenderMat = GetComponent<Renderer>();
         
     }
+
     void Start()
     {
         variety = transform.GetComponentInParent<Pvr_ControllerModuleInit>().Variety;
     }
 
-    // Update is called once per frame
     void Update()
     {
         ChangeKeyEffects(variety == ControllerVariety.Controller0 ? 0 : 1);
     }
-
-    
+   
     private void ChangeKeyEffects(int hand)
     {
         if (Controller.UPvr_GetKey(hand, Pvr_KeyCode.TOUCHPAD))

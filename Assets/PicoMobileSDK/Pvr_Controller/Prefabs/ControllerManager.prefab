@@ -42,6 +42,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   toast: {fileID: 0}
+  LengthAdaptiveRay: 0
 --- !u!114 &11442720
 MonoBehaviour:
   m_ObjectHideFlags: 1

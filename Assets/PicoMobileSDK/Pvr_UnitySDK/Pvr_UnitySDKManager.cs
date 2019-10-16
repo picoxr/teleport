@@ -1,11 +1,4 @@
-﻿///////////////////////////////////////////////////////////////////////////////
-// Copyright 2015-2017  Pico Technology Co., Ltd. All Rights Reserved.
-// File: Pvr_UnitySDKManager
-// Author: AiLi.Shang
-// Date:  2017/01/13
-// Discription:  Be fully careful of  Code modification!
-/////////////////////////////////////////////////////////////////////////////// 
-using System;
+﻿using System;
 using UnityEngine;
 using System.Collections;
 using System.Runtime.InteropServices;
@@ -24,7 +17,7 @@ public class Pvr_UnitySDKManager : MonoBehaviour
     #region Properties
     public static PlatForm platform;
     bool BattEnable = false;
-    //signtal                   
+
     private static Pvr_UnitySDKManager sdk = null;
     public static Pvr_UnitySDKManager SDK
     {
@@ -238,22 +231,6 @@ public class Pvr_UnitySDKManager : MonoBehaviour
             }
         }
     }
-
-    //[SerializeField]
-    //private RenderTextureLevel rtLevel = RenderTextureLevel.Normal;
-    //public RenderTextureLevel RtLevel
-    //{
-    //    get
-    //    {
-    //        return rtLevel;
-    //    }
-    //    set
-    //    {
-    //        if (value != rtLevel)
-    //            rtLevel = value;
-
-    //    }
-    //}
 
     [SerializeField]
     private bool defaultRenderTexture;
@@ -482,27 +459,15 @@ public class Pvr_UnitySDKManager : MonoBehaviour
     [HideInInspector]
     public Vector3 neckOffset = new Vector3(0, 0.075f, 0.0805f);
 
-    [SerializeField]
-    private static bool pvrNeck = true;
     [HideInInspector]
-    public static bool PVRNeck
-    {
-        get
-        {
-            return pvrNeck;
-        }
-        set
-        {
-            if (value != pvrNeck)
-            {
-                pvrNeck = value;
-            }
-        }
-    }
+    public bool PVRNeck = true;
+
 
     // life
     [HideInInspector]
     public bool onResume = false;
+    [HideInInspector]
+    public bool isEnterVRMode = false;
 
     private GameObject safeArea;
     [HideInInspector]
@@ -511,7 +476,7 @@ public class Pvr_UnitySDKManager : MonoBehaviour
     public GameObject resetPanel;
     private GameObject safePanel1;
     private GameObject safePanel2;
-    private bool isHasController = false;
+    public bool isHasController = false;
     public GameObject ViewerToast;
     public Pvr_UnitySDKConfigProfile pvr_UnitySDKConfig;
 
@@ -528,6 +493,21 @@ public class Pvr_UnitySDKManager : MonoBehaviour
             if (value != isViewerLogicFlow)
             {
                 isViewerLogicFlow = value;
+            }
+        }
+    }
+    [SerializeField]
+    private bool monoscopic = false;
+
+    [HideInInspector]
+    public bool Monoscopic
+    {
+        get { return monoscopic; }
+        set
+        {
+            if (value != monoscopic)
+            {
+                monoscopic = value;
             }
         }
     }
@@ -557,8 +537,7 @@ public class Pvr_UnitySDKManager : MonoBehaviour
                 {
                     showtext = "バッテリー残量が" + s + "% 以下になりました。充電してください";
                 }
-                //  ViewerToast.transform.GetComponentInChildren<Text>().text = showtext;
-                ViewerToast.active = true;
+                ViewerToast.SetActive(true);
                 ViewerToast.transform.Find("Panel").GetComponentInChildren<Text>().text = showtext;
 
                 Invoke("disableViewerToast", 2.0f);
@@ -573,7 +552,7 @@ public class Pvr_UnitySDKManager : MonoBehaviour
 
     public void disableViewerToast()
     {
-        ViewerToast.active = false;
+        ViewerToast.SetActive(false);
     }
 
 
@@ -581,10 +560,10 @@ public class Pvr_UnitySDKManager : MonoBehaviour
 
     /************************************ Private Interfaces  *********************************/
     #region Private Interfaces
-    private  AndroidJavaClass javaSysActivityClass;
-    private  UnityEngine.AndroidJavaClass batteryjavaVrActivityClass;
+    private AndroidJavaClass javaSysActivityClass;
+    private UnityEngine.AndroidJavaClass batteryjavaVrActivityClass;
     private bool InitViewerBatteryVolClass()
-    {   
+    {
 #if !UNITY_EDITOR && UNITY_ANDROID
         try
         {  
@@ -642,71 +621,11 @@ public class Pvr_UnitySDKManager : MonoBehaviour
 #endif
         return true;
     }
-    private void AddPrePostRenderStages()
-    {
-        var preRender = UnityEngine.Object.FindObjectOfType<Pvr_UnitySDKPreRender>();
-        if (preRender == null)
-        {
-            var go = new GameObject("PreRender", typeof(Pvr_UnitySDKPreRender));
-            go.SendMessage("Reset");
-            go.transform.parent = transform;
-        }
-
-        var postRender = UnityEngine.Object.FindObjectOfType<Pvr_UnitySDKPostRender>();
-        if (postRender == null)
-        {
-            var go = new GameObject("PostRender", typeof(Pvr_UnitySDKPostRender));
-            go.SendMessage("Reset");
-            go.transform.parent = transform;
-        }
-    }
-
-    //private int CheckOverlays()
-    //{
-    //    int ret = 0;
-    //    Pvr_UnitySDKOverlay[] Overlays = null;
-    //    Overlays = GetComponentsInChildren<Pvr_UnitySDKOverlay>(false);
-
-    //    int overlayBothIndex = -1;
-    //    for (int i = 0; i < Overlays.Length; i++)
-    //    {
-    //        if (Overlays[i].overlaySide == Pvr_UnitySDKOverlay.OverlaySide.OverlayBoth)
-    //        {
-    //            overlayBothIndex = i;
-    //        }
-
-    //    }
-
-    //    if (overlayBothIndex >= 0)
-    //    {
-    //        if (Overlays[overlayBothIndex].gameObject.activeSelf)
-    //        {
-    //            for (int i = 0; i < Overlays.Length; i++)
-    //            {
-    //                if (i != overlayBothIndex)
-    //                {
-    //                    Overlays[i].gameObject.SetActive(false);
-    //                }
-    //            }
-    //        }
-
-    //        ret = 1;
-    //    }
-    //    else
-    //    {
-    //        ret = Overlays.Length;
-    //    }
-
-    //    return ret;
-    //}
-
 
     private bool SDKManagerInit()
     {
         if (SDKManagerInitConfigProfile())
         {
-            //overlayCamNum = CheckOverlays();
-            //Debug.Log("overlayCamNum = " + overlayCamNum);
             mIsAndroid7 = SystemInfo.operatingSystem.Contains("Android OS 7.");
             Debug.Log("Android 7 = " + mIsAndroid7);
 #if UNITY_EDITOR
@@ -725,17 +644,10 @@ public class Pvr_UnitySDKManager : MonoBehaviour
         }
         else
             return false;
-
     }
 
     private bool SDKManagerInitCoreAbility()
     {
-        if (!isViewerLogicFlow)
-        {
-            AddPrePostRenderStages();
-            PLOG.D("AddPrePostRenderStages");
-        }
-
         if (pvr_UnitySDKRender == null)
         {
             Debug.Log("pvr_UnitySDKRender  init");
@@ -930,7 +842,6 @@ public class Pvr_UnitySDKManager : MonoBehaviour
         }
         return enable;
     }
-
     #endregion
 
     /*************************************  Unity API ****************************************/
@@ -1422,7 +1333,7 @@ public class Pvr_UnitySDKManager : MonoBehaviour
     private void OnPause()
     {
         Pvr_UnitySDKAPI.System.UPvr_StopHomeKeyReceiver();
-        LeaveVRMode();
+        this.LeaveVRMode();
         if (pvr_UnitySDKSensor != null)
         {
             pvr_UnitySDKSensor.StopUnitySDKSensor();
@@ -1439,8 +1350,10 @@ public class Pvr_UnitySDKManager : MonoBehaviour
             Debug.Log("tclogpp Avtivity Pause state is ----- " + state);
             pause = state;
         }
+
         if (pause)
         { 
+            onResume = false;
            if (BattEnable && IsViewerLogicFlow)
             {
                 StopViewerBatteryReceiver();
@@ -1463,21 +1376,22 @@ public class Pvr_UnitySDKManager : MonoBehaviour
         {
             if (IsViewerLogicFlow)
             {
-                // Viewer battery  
                 string gameobjName = this.gameObject.name;
                 StartViewerBatteryReceiver(gameobjName);
             }
         }
     }
 
-    public static void EnterVRMode()
+    public void EnterVRMode()
     {
         Pvr_UnitySDKPluginEvent.Issue(RenderEventType.Resume);
+        this.isEnterVRMode = true;
     }
 
-    public static void LeaveVRMode()
+    public void LeaveVRMode()
     {
         Pvr_UnitySDKPluginEvent.Issue(RenderEventType.Pause);
+        this.isEnterVRMode = false;
     }
 
     public void SixDofForceQuit()
@@ -1495,7 +1409,7 @@ public class Pvr_UnitySDKManager : MonoBehaviour
         AndroidJavaObject bundleObj = applicationInfoObj.Get<AndroidJavaObject>("metaData");
         isPUI = Convert.ToBoolean(bundleObj.Call<int>("getInt", "isPUI"));
     }
-#endregion
+    #endregion
 
     /************************************    IEnumerator  *************************************/
     private IEnumerator OnResume()
@@ -1543,15 +1457,15 @@ public class Pvr_UnitySDKManager : MonoBehaviour
         bool isPresentationExisted = Pvr_UnitySDKAPI.System.UPvr_IsPresentationExisted();
         Debug.Log("onresume presentation existed ?-------------" + isPresentationExisted.ToString());
         if (isPresentationExisted)
-        {          
+        {
             yield return new WaitForSeconds(1.0f);
         }
         else
         {
-           yield return new WaitForSeconds(1.0f);
+            yield return new WaitForSeconds(1.0f);
         }
-		
-        EnterVRMode();
+
+        this.EnterVRMode();
         Pvr_UnitySDKAPI.System.UPvr_StartHomeKeyReceiver(this.gameObject.name);
         Pvr_UnitySDKEye.setLevel = false;
     }

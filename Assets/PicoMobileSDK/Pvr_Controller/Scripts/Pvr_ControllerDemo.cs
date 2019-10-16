@@ -1,6 +1,7 @@
-﻿using Pvr_UnitySDKAPI;
-using System;
+﻿using System;
 using UnityEngine;
+using System.Collections;
+using Pvr_UnitySDKAPI;
 
 public class Pvr_ControllerDemo : MonoBehaviour
 {
@@ -11,8 +12,6 @@ public class Pvr_ControllerDemo : MonoBehaviour
     public GameObject cube;
 
     private Ray ray;
-
-    [HideInInspector]
     public GameObject currentController;
 
     private Transform lastHit;
@@ -20,23 +19,24 @@ public class Pvr_ControllerDemo : MonoBehaviour
 
     [SerializeField]
     private Material normat;
-
     [SerializeField]
     private Material gazemat;
-
     [SerializeField]
     private Material clickmat;
-
     private bool noClick;
-    private GameObject referenceObj;
-
-    // Use this for initialization
-    private void Start()
+    GameObject referenceObj;
+    public float rayDefaultLength = 4;
+    private bool isHasController = false;
+    void Start()
     {
         ray = new Ray();
-        Pvr_ControllerManager.PvrServiceStartSuccessEvent += ServiceStartSuccess;
-        Pvr_ControllerManager.SetControllerStateChangedEvent += ControllerStateListener;
-        Pvr_ControllerManager.ControllerStatusChangeEvent += CheckControllerStateForGoblin;
+        if (Pvr_UnitySDKManager.SDK.isHasController)
+        {
+            Pvr_ControllerManager.PvrServiceStartSuccessEvent += ServiceStartSuccess;
+            Pvr_ControllerManager.SetControllerStateChangedEvent += ControllerStateListener;
+            Pvr_ControllerManager.ControllerStatusChangeEvent += CheckControllerStateForGoblin;
+            isHasController = true;
+        }
 #if UNITY_EDITOR
         currentController = controller0;
 #endif
@@ -51,80 +51,121 @@ public class Pvr_ControllerDemo : MonoBehaviour
         referenceObj = new GameObject("ReferenceObj");
     }
 
-    private void OnDestroy()
+    void OnDestroy()
     {
-        Pvr_ControllerManager.PvrServiceStartSuccessEvent -= ServiceStartSuccess;
-        Pvr_ControllerManager.SetControllerStateChangedEvent -= ControllerStateListener;
-        Pvr_ControllerManager.ControllerStatusChangeEvent -= CheckControllerStateForGoblin;
+        if (isHasController)
+        {
+            Pvr_ControllerManager.PvrServiceStartSuccessEvent -= ServiceStartSuccess;
+            Pvr_ControllerManager.SetControllerStateChangedEvent -= ControllerStateListener;
+            Pvr_ControllerManager.ControllerStatusChangeEvent -= CheckControllerStateForGoblin;
+        }
     }
 
-    // Update is called once per frame
-    private void Update()
+    void Update()
     {
-        //if (HeadSetController.activeSelf)
-        //{
-        //    HeadSetController.transform.parent.localRotation = Quaternion.Euler(Pvr_UnitySDKManager.SDK.HeadPose.Orientation.eulerAngles.x, Pvr_UnitySDKManager.SDK.HeadPose.Orientation.eulerAngles.y, 0);
 
-        //    ray.direction = HeadSetController.transform.position - HeadSetController.transform.parent.parent.Find("Head").position;
-        //    ray.origin = HeadSetController.transform.parent.parent.Find("Head").position;
-        //    RaycastHit hit;
-        //    if (Physics.Raycast(ray, out hit))
-        //    {
-        //        currentHit = hit.transform;
+        if (HeadSetController.activeSelf)
+        {
+            HeadSetController.transform.parent.localRotation = Quaternion.Euler(Pvr_UnitySDKManager.SDK.HeadPose.Orientation.eulerAngles.x, Pvr_UnitySDKManager.SDK.HeadPose.Orientation.eulerAngles.y, 0);
 
-        //        if (currentHit != null && lastHit != null && currentHit != lastHit)
-        //        {
-        //            if (lastHit.GetComponent<Pvr_UIGraphicRaycaster>() && lastHit.transform.gameObject.activeInHierarchy && lastHit.GetComponent<Pvr_UIGraphicRaycaster>().enabled)
-        //            {
-        //                lastHit.GetComponent<Pvr_UIGraphicRaycaster>().enabled = false;
-        //            }
-        //        }
-        //        if (currentHit != null && lastHit != null && currentHit == lastHit)
-        //        {
-        //            if (currentHit.GetComponent<Pvr_UIGraphicRaycaster>() && !currentHit.GetComponent<Pvr_UIGraphicRaycaster>().enabled)
-        //            {
-        //                currentHit.GetComponent<Pvr_UIGraphicRaycaster>().enabled = true;
-        //            }
-        //        }
+            ray.direction = HeadSetController.transform.position - HeadSetController.transform.parent.parent.Find("Head").position;
+            ray.origin = HeadSetController.transform.parent.parent.Find("Head").position;
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit))
+            {
+                if (HeadSetController.name == "SightPointer")
+                {
+                    HeadSetController.transform.localScale = new Vector3(0.09f, 0.09f, 0.09f);
+                }
 
-        //        if (1 << hit.transform.gameObject.layer == LayerMask.GetMask("Water"))
-        //        {
-        //            if (!noClick)
-        //                hit.transform.GetComponent<Renderer>().material = gazemat;
-        //        }
-        //        lastHit = hit.transform;
-        //        Debug.DrawLine(ray.origin, hit.point, Color.red);
-        //    }
-        //    else
-        //    {
-        //        if (lastHit != null && 1 << lastHit.transform.gameObject.layer == LayerMask.GetMask("Water"))
-        //        {
-        //            lastHit.transform.GetComponent<Renderer>().material = normat;
-        //        }
-        //        currentHit = null;
-        //        noClick = false;
-        //    }
+                currentHit = hit.transform;
 
-        //    if (Input.GetKeyDown(KeyCode.JoystickButton0) || Input.GetMouseButtonDown(0))
-        //    {
-        //        if (lastHit != null && 1 << lastHit.transform.gameObject.layer == LayerMask.GetMask("Water") && currentHit != null)
-        //        {
-        //            lastHit.transform.GetComponent<Renderer>().material = clickmat;
-        //            noClick = true;
-        //        }
-        //    }
-        //}
-        //else
+                if (currentHit != null && lastHit != null && currentHit != lastHit)
+                {
+                    if (lastHit.GetComponent<Pvr_UIGraphicRaycaster>() && lastHit.transform.gameObject.activeInHierarchy && lastHit.GetComponent<Pvr_UIGraphicRaycaster>().enabled)
+                    {
+                        lastHit.GetComponent<Pvr_UIGraphicRaycaster>().enabled = false;
+                    }
+                }
+                if (currentHit != null && lastHit != null && currentHit == lastHit)
+                {
+                    if (currentHit.GetComponent<Pvr_UIGraphicRaycaster>() && !currentHit.GetComponent<Pvr_UIGraphicRaycaster>().enabled)
+                    {
+                        currentHit.GetComponent<Pvr_UIGraphicRaycaster>().enabled = true;
+                    }
+                }
+
+                if (1 << hit.transform.gameObject.layer == LayerMask.GetMask("Water"))
+                {
+                    if (!noClick)
+                        hit.transform.GetComponent<Renderer>().material = gazemat;
+                }
+                lastHit = hit.transform;
+                Debug.DrawLine(ray.origin, hit.point, Color.red);
+
+                if (Pvr_ControllerManager.Instance.LengthAdaptiveRay)
+                {
+                    HeadSetController.transform.position = hit.point;
+                    HeadSetController.transform.position -= (hit.point - HeadSetController.transform.parent.parent.Find("Head").position).normalized * 0.02f;
+                    float scale = 0.008f * hit.distance / 4f;
+                    Mathf.Clamp(scale, 0.002f, 0.008f);
+                    HeadSetController.transform.localScale = new Vector3(scale, scale, 1);
+                }
+            }
+            else
+            {
+                if (HeadSetController.name == "SightPointer")
+                {
+                    HeadSetController.transform.localScale = Vector3.zero;
+                }
+                if (lastHit != null && 1 << lastHit.transform.gameObject.layer == LayerMask.GetMask("Water"))
+                {
+                    lastHit.transform.GetComponent<Renderer>().material = normat;
+                }
+                currentHit = null;
+                noClick = false;
+                if (Pvr_ControllerManager.Instance.LengthAdaptiveRay)
+                {
+                    HeadSetController.transform.position = HeadSetController.transform.parent.parent.Find("Head").position + ray.direction.normalized * (0.5f + rayDefaultLength);
+                    HeadSetController.transform.localScale = new Vector3(0.008f, 0.008f, 1);
+                }
+            }
+
+            if (Input.GetKeyDown(KeyCode.JoystickButton0) || Input.GetMouseButtonDown(0))
+            {
+                if (lastHit != null && 1 << lastHit.transform.gameObject.layer == LayerMask.GetMask("Water") && currentHit != null)
+                {
+                    lastHit.transform.GetComponent<Renderer>().material = clickmat;
+                    noClick = true;
+                }
+            }
+        }
+        else
         {
             if (currentController != null)
             {
                 ray.direction = currentController.transform.Find("dot").position - currentController.transform.Find("start").position;
                 ray.origin = currentController.transform.Find("start").position;
-
                 RaycastHit hit;
                 if (Physics.Raycast(ray, out hit))
                 {
                     currentHit = hit.transform;
+
+                    if (currentHit != null && lastHit != null && currentHit != lastHit)
+                    {
+                        if (lastHit.GetComponent<Pvr_UIGraphicRaycaster>() && lastHit.transform.gameObject.activeInHierarchy && lastHit.GetComponent<Pvr_UIGraphicRaycaster>().enabled)
+                        {
+                            lastHit.GetComponent<Pvr_UIGraphicRaycaster>().enabled = false;
+                        }
+                    }
+                    if (currentHit != null && lastHit != null && currentHit == lastHit)
+                    {
+                        if (currentHit.GetComponent<Pvr_UIGraphicRaycaster>() && !currentHit.GetComponent<Pvr_UIGraphicRaycaster>().enabled)
+                        {
+                            currentHit.GetComponent<Pvr_UIGraphicRaycaster>().enabled = true;
+
+                        }
+                    }
                     if (1 << hit.transform.gameObject.layer == LayerMask.GetMask("Water"))
                     {
                         if (!noClick)
@@ -150,6 +191,12 @@ public class Pvr_ControllerDemo : MonoBehaviour
                     lastHit = hit.transform;
                     Debug.DrawLine(ray.origin, hit.point, Color.red);
                     currentController.transform.Find("dot").position = hit.point;
+                    if (Pvr_ControllerManager.Instance.LengthAdaptiveRay)
+                    {
+                        float scale = 0.178f * currentController.transform.Find("dot").localPosition.z / 3.3f;
+                        Mathf.Clamp(scale, 0.05f, 0.178f);
+                        currentController.transform.Find("dot").localScale = new Vector3(scale, scale, 1);
+                    }
                 }
                 else
                 {
@@ -159,6 +206,12 @@ public class Pvr_ControllerDemo : MonoBehaviour
                     }
                     currentHit = null;
                     noClick = false;
+
+                    if(Pvr_ControllerManager.Instance.LengthAdaptiveRay)
+                    {
+                        currentController.transform.Find("dot").localScale = new Vector3(0.178f, 0.178f, 1);
+                        currentController.transform.Find("dot").position = currentController.transform.position + currentController.transform.forward.normalized * (0.5f + rayDefaultLength);
+                    }
                 }
             }
 
@@ -173,9 +226,8 @@ public class Pvr_ControllerDemo : MonoBehaviour
             }
         }
     }
-
     private Transform dragObj;
-    private float disX, disY, disZ;
+    float disX, disY, disZ;
 
     private void ServiceStartSuccess()
     {
@@ -200,6 +252,7 @@ public class Pvr_ControllerDemo : MonoBehaviour
 
     private void ControllerStateListener(string data)
     {
+
         if (Controller.UPvr_GetControllerState(0) == ControllerState.Connected ||
             Controller.UPvr_GetControllerState(1) == ControllerState.Connected)
         {
@@ -224,4 +277,5 @@ public class Pvr_ControllerDemo : MonoBehaviour
     {
         HeadSetController.SetActive(!Convert.ToBoolean(Convert.ToInt16(state)));
     }
+
 }

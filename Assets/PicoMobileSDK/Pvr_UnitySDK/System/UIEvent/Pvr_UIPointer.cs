@@ -1,8 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.EventSystems;
-
-
 
 public struct UIPointerEventArgs
 {
@@ -15,7 +12,8 @@ public struct UIPointerEventArgs
 public delegate void UIPointerEventHandler(object sender, UIPointerEventArgs e);
 
 
-public class Pvr_UIPointer : MonoBehaviour {
+public class Pvr_UIPointer : MonoBehaviour
+{
 
 
     public enum ClickMethods
@@ -25,7 +23,7 @@ public class Pvr_UIPointer : MonoBehaviour {
     }
 
     public ClickMethods clickMethod = ClickMethods.ClickOnButtonUp;
-    
+
 
     [HideInInspector]
     public bool collisionClick = false;
@@ -42,7 +40,7 @@ public class Pvr_UIPointer : MonoBehaviour {
     public float hoverDurationTimer = 0f;
     [HideInInspector]
     public bool canClickOnHover = false;
-    
+
     public Transform pointerOriginTransform = null;
 
     protected bool pointerClicked = false;
@@ -51,7 +49,7 @@ public class Pvr_UIPointer : MonoBehaviour {
     protected bool lastPointerClickState = false;
 
     protected GameObject currentTarget;
-    
+
     protected EventSystem cachedEventSystem;
     protected Pvr_InputModule cachedVRInputModule;
     protected Transform originalPointerOriginTransform;
@@ -59,12 +57,16 @@ public class Pvr_UIPointer : MonoBehaviour {
     public event UIPointerEventHandler UIPointerElementEnter;
 
     public event UIPointerEventHandler UIPointerElementExit;
-    
+
     public event UIPointerEventHandler UIPointerElementClick;
-    
+
     public event UIPointerEventHandler UIPointerElementDragStart;
-    
+
     public event UIPointerEventHandler UIPointerElementDragEnd;
+
+    public static bool TouchBtnValue = false;
+    public static bool AppBtnValue = false;
+    public static bool TriggerBtnValue = false;
     public virtual bool PointerActive()
     {
         return true;
@@ -72,17 +74,7 @@ public class Pvr_UIPointer : MonoBehaviour {
 
     public virtual bool IsSelectionButtonPressed()
     {
-        bool controllerValue = false;
-        if (Pvr_ControllerManager.controllerlink.neoserviceStarted)
-        {
-            controllerValue = Pvr_UnitySDKAPI.Controller.UPvr_GetKey(Pvr_UnitySDKAPI.Controller.UPvr_GetMainHandNess(),
-                Pvr_UnitySDKAPI.Pvr_KeyCode.TOUCHPAD);
-        }
-        if (Pvr_ControllerManager.controllerlink.goblinserviceStarted)
-        {
-            controllerValue = Pvr_UnitySDKAPI.Controller.UPvr_GetKey(0, Pvr_UnitySDKAPI.Pvr_KeyCode.TOUCHPAD);
-        }
-        return Input.GetMouseButton(0) || Input.GetKey(KeyCode.JoystickButton0) || controllerValue;    
+        return Input.GetMouseButton(0) || Input.GetKey(KeyCode.JoystickButton0) || TouchBtnValue || AppBtnValue || TriggerBtnValue;
     }
 
     public virtual Vector3 GetOriginPosition()
@@ -113,7 +105,7 @@ public class Pvr_UIPointer : MonoBehaviour {
         {
             ResetHoverTimer();
         }
-        
+
         currentTarget = e.currentTarget;
         if (UIPointerElementEnter != null)
         {
@@ -177,14 +169,14 @@ public class Pvr_UIPointer : MonoBehaviour {
 
     protected virtual void OnEnable()
     {
-        pointerOriginTransform =  originalPointerOriginTransform;
-        
+        pointerOriginTransform = originalPointerOriginTransform;
+
         ConfigureEventSystem();
         pointerClicked = false;
         lastPointerPressState = false;
         lastPointerClickState = false;
         beamEnabledState = false;
-        
+
     }
 
     protected virtual void OnDisable()
@@ -194,7 +186,7 @@ public class Pvr_UIPointer : MonoBehaviour {
             cachedVRInputModule.pointers.Remove(this);
         }
     }
-    
+
     protected virtual void ConfigureEventSystem()
     {
         if (!cachedEventSystem)
@@ -220,5 +212,5 @@ public class Pvr_UIPointer : MonoBehaviour {
             }
         }
     }
-    
+
 }

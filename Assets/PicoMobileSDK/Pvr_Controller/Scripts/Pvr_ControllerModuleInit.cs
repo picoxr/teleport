@@ -24,7 +24,6 @@ public class Pvr_ControllerModuleInit : MonoBehaviour
     private GameObject rayLine;
     [SerializeField]
     private GameObject controller;
-    private int controllerDof = -1;
     private int mainHand = 0;
     private bool moduleState = true;
 
@@ -33,6 +32,17 @@ public class Pvr_ControllerModuleInit : MonoBehaviour
         Pvr_ControllerManager.PvrServiceStartSuccessEvent += ServiceStartSuccess;
         Pvr_ControllerManager.SetControllerAbilityEvent += CheckControllerStateOfAbility;
         Pvr_ControllerManager.ControllerStatusChangeEvent += CheckControllerStateForGoblin;
+
+        if(Pvr_ControllerManager.Instance.LengthAdaptiveRay)
+        {           
+            rayLine = transform.GetComponentInChildren<LineRenderer>(true).gameObject;
+#if UNITY_2017_1_OR_NEWER
+            rayLine.GetComponent<LineRenderer>().startWidth = 0.003f;
+            rayLine.GetComponent<LineRenderer>().endWidth = 0.0015f;
+#else
+            rayLine.GetComponent<LineRenderer>().SetWidth(0.003f, 0.0015f);
+#endif
+        }
     }
     void OnDestroy()
     {
@@ -105,5 +115,44 @@ public class Pvr_ControllerModuleInit : MonoBehaviour
         rayLine.SetActive(state);
         controller.transform.localScale = state ? Vector3.one : Vector3.zero;
         moduleState = state;
+    }
+
+    public void UpdateRay()
+    {
+        if (!Pvr_ControllerManager.Instance.LengthAdaptiveRay)
+        {
+            return;
+        }
+        bool isupdate = false;
+        mainHand = Controller.UPvr_GetMainHandNess();
+        if (Variety == ControllerVariety.Controller0)
+        {
+            if (mainHand == 0 && Pvr_ControllerManager.controllerlink.controller0Connected)
+            {
+                isupdate = true;
+            }
+
+        }
+        if (Variety == ControllerVariety.Controller1)
+        {
+            if (mainHand == 1 && Pvr_ControllerManager.controllerlink.controller1Connected)
+            {
+                isupdate = true;
+            }
+        }
+
+        if (isupdate && rayLine != null && rayLine.gameObject.activeSelf)
+        {
+            int type = Controller.UPvr_GetDeviceType();
+            if (type == 1)
+            {
+                rayLine.GetComponent<LineRenderer>().SetPosition(0, transform.TransformPoint(0, 0, 0.058f));
+            }
+            else
+            {
+                rayLine.GetComponent<LineRenderer>().SetPosition(0, transform.TransformPoint(0, 0.009f, 0.055f));
+            }
+            rayLine.GetComponent<LineRenderer>().SetPosition(1, dot.transform.position);
+        }
     }
 }

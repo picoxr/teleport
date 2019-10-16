@@ -693,7 +693,7 @@ Camera:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 172220}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0.019607844}
@@ -718,11 +718,11 @@ Camera:
   m_TargetEye: 3
   m_HDR: 0
   m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
-  m_StereoMirrorMode: 0
 --- !u!20 &2053100
 Camera:
   m_ObjectHideFlags: 1
@@ -754,11 +754,11 @@ Camera:
   m_TargetEye: 3
   m_HDR: 0
   m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
-  m_StereoMirrorMode: 0
 --- !u!20 &2063796
 Camera:
   m_ObjectHideFlags: 1
@@ -790,11 +790,11 @@ Camera:
   m_TargetEye: 3
   m_HDR: 0
   m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
-  m_StereoMirrorMode: 0
 --- !u!23 &2345876
 MeshRenderer:
   m_ObjectHideFlags: 1
@@ -804,6 +804,7 @@ MeshRenderer:
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -819,6 +820,7 @@ MeshRenderer:
   m_PreserveUVs: 1
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
   m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
@@ -836,6 +838,7 @@ MeshRenderer:
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -851,6 +854,7 @@ MeshRenderer:
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
   m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
@@ -1063,18 +1067,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   eyeSide: 0
-  layerIndex: 0
   isFadeUSing: 1
   fadeTime: 5
   fadeColor: {r: 0.01, g: 0.01, b: 0.01, a: 1}
-  clipLowerLeft: {x: -1, y: -1, z: 0, w: 1}
-  clipUpperLeft: {x: -1, y: 1, z: 0, w: 1}
-  clipUpperRight: {x: 1, y: 1, z: 0, w: 1}
-  clipLowerRight: {x: 1, y: -1, z: 0, w: 1}
-  uvLowerLeft: {x: 0, y: 0}
-  uvUpperLeft: {x: 0, y: 1}
-  uvUpperRight: {x: 1, y: 1}
-  uvLowerRight: {x: 1, y: 0}
+  foveationLevel: -1
+  FoveationGainValue: {x: 0, y: 0}
+  FoveationAreaValue: 0
+  FoveationMinimumValue: 0
 --- !u!114 &11427724
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1199,18 +1198,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   eyeSide: 1
-  layerIndex: 0
   isFadeUSing: 1
   fadeTime: 5
   fadeColor: {r: 0.01, g: 0.01, b: 0.01, a: 1}
-  clipLowerLeft: {x: -1, y: -1, z: 0, w: 1}
-  clipUpperLeft: {x: -1, y: 1, z: 0, w: 1}
-  clipUpperRight: {x: 1, y: 1, z: 0, w: 1}
-  clipLowerRight: {x: 1, y: -1, z: 0, w: 1}
-  uvLowerLeft: {x: 0, y: 0}
-  uvUpperLeft: {x: 0, y: 1}
-  uvUpperRight: {x: 1, y: 1}
-  uvLowerRight: {x: 1, y: 0}
+  foveationLevel: -1
+  FoveationGainValue: {x: 0, y: 0}
+  FoveationAreaValue: 0
+  FoveationMinimumValue: 0
 --- !u!114 &11439172
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1426,11 +1420,15 @@ MonoBehaviour:
   movingRatios: 1
   screenFade: 0
   neckOffset: {x: 0, y: 0.075, z: 0.0805}
+  PVRNeck: 1
   onResume: 1
+  isEnterVRMode: 0
   safeToast: {fileID: 0}
   resetPanel: {fileID: 0}
+  isHasController: 0
   ViewerToast: {fileID: 0}
   isViewerLogicFlow: 1
+  monoscopic: 0
 --- !u!114 &11446018
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1442,7 +1440,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5485beee6e02bf54bbf709c2a2b400c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isfirst: 1
+  LeftEyeCamera: {fileID: 2014064}
+  RightEyeCamera: {fileID: 2063796}
+  MonoEyeCamera: {fileID: 2053100}
+  isFirstStartup: 1
 --- !u!114 &11457056
 MonoBehaviour:
   m_ObjectHideFlags: 1

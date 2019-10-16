@@ -1,11 +1,4 @@
-﻿///////////////////////////////////////////////////////////////////////////////
-// Copyright 2015-2017  Pico Technology Co., Ltd. All Rights Reserved.
-// File: Pvr_ControllerManager
-// Author: Yangel.Yan
-// Date:  2017/01/11
-// Discription: Be Sure Your controller demo has this script
-///////////////////////////////////////////////////////////////////////////////
-#if !UNITY_EDITOR
+﻿#if !UNITY_EDITOR
 #if UNITY_ANDROID
 #define ANDROID_DEVICE
 #elif UNITY_IPHONE
@@ -48,7 +41,7 @@ public class Pvr_ControllerManager : MonoBehaviour
         }
     }
     #region Properties
-
+    
     public static bool longPressclock;
     public static Pvr_ControllerLink controllerlink;
     private float cTime = 1.0f;
@@ -61,6 +54,7 @@ public class Pvr_ControllerManager : MonoBehaviour
     private int triggernum;
     private DateTime beginDT;
     private DateTime endDT;
+    public bool LengthAdaptiveRay;
     #endregion
 
     //Service Start Success

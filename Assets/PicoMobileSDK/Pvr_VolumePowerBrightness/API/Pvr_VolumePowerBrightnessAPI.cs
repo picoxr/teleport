@@ -1,11 +1,4 @@
-﻿///////////////////////////////////////////////////////////////////////////////
-// Copyright 2015-2017  Pico Technology Co., Ltd. All Rights Reserved.
-// File: Pvr_VolumePowerBrightnessAPI
-// Author: AiLi.Shang
-// Date:  2017/03/22
-// Discription: The API  funcation
-///////////////////////////////////////////////////////////////////////////////
-#if !UNITY_EDITOR
+﻿#if !UNITY_EDITOR
 #if UNITY_ANDROID
 #define ANDROID_DEVICE
 #elif UNITY_IPHONE
@@ -15,10 +8,9 @@
 #endif
 #endif
 
-using UnityEngine;
-using System.Collections;
 using System;
 using System.Runtime.InteropServices;
+using UnityEngine;
 
 namespace Pvr_UnitySDKAPI
 {
@@ -39,20 +31,28 @@ namespace Pvr_UnitySDKAPI
     [StructLayout(LayoutKind.Sequential)]
     public struct VolumePowerBrightness
     {
-        #region Android
         public const string LibFileName = "Pvr_UnitySDK";
+
         [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void Pvr_SetInitActivity(IntPtr activity, IntPtr vrActivityClass);
+
+        [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool Pvr_IsHmdExist();
+
+        [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pvr_GetHmdScreenBrightness();
+
+        [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool Pvr_SetHmdScreenBrightness(int brightness);
+
 #if ANDROID_DEVICE
-            /*****************************音量亮度*************************************/
         public AndroidJavaObject activity;
         public static AndroidJavaClass javaSysActivityClass;         
         private static UnityEngine.AndroidJavaClass batteryjavaVrActivityClass;     
         private static UnityEngine.AndroidJavaClass volumejavaVrActivityClass;
 #endif
-        #endregion
 
-        #region Public Static Funcation
+        #region Public Function
         public static bool UPvr_IsHmdExist()
         {
 #if ANDROID_DEVICE
@@ -394,29 +394,15 @@ namespace Pvr_UnitySDKAPI
         public static bool UPvr_SetAudio(string s)
         {
             return false;
-        }          
+        }
         public static bool UPvr_SetBattery(string s)
         {
             return false;
         }
-        
-#endregion
 
-#region DllFuncation
+        #endregion
 
-        //Brightness
-        [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool Pvr_IsHmdExist();
-
-        [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int Pvr_GetHmdScreenBrightness();
-
-        [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern bool Pvr_SetHmdScreenBrightness(int brightness);
-
-#endregion
-
-#region Pravite Static Funcation
+        #region Pravite Function
         private static string getDevicePropForUser(DeviceCommand deviceid)
         {
             string istrue = "0";
@@ -425,6 +411,7 @@ namespace Pvr_UnitySDKAPI
 #endif
             return istrue;
         }
+
         private static bool setDevicePropForUser(DeviceCommand deviceid, string number)
         {
             bool istrue = false;
@@ -432,8 +419,7 @@ namespace Pvr_UnitySDKAPI
              Pvr_UnitySDKAPI.System.UPvr_CallStaticMethod<bool>(ref istrue, Pvr_UnitySDKRender.javaVrActivityClass, "setDevicePropForUser", (int)deviceid, number);
 #endif
             return istrue;
-        } 
-#endregion
+        }
+        #endregion
     }
-
 }

@@ -5,8 +5,6 @@ using UnityEngine.UI;
 
 public class Pvr_ToolTips : MonoBehaviour
 {
-
-
     public enum TipBtn
     {
         app,
@@ -62,7 +60,7 @@ public class Pvr_ToolTips : MonoBehaviour
                 break;
         }
     }
-    // Use this for initialization
+
     void Start()
     {
         SystemLanguage localanguage = Application.systemLanguage;
@@ -117,7 +115,7 @@ public class Pvr_ToolTips : MonoBehaviour
             }
         }
     }
-    // Update is called once per frame
+
     void Update()
     {
 

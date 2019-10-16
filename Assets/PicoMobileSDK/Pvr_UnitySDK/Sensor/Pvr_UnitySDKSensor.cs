@@ -1,25 +1,16 @@
-﻿///////////////////////////////////////////////////////////////////////////////
-// Copyright 2015-2017  Pico Technology Co., Ltd. All Rights 
-// File: Pvr_UnitySDKSensor
-// Author: AiLi.Shang
-// Date:  2017/01/13
-// Discription:The using of main sensor.
-///////////////////////////////////////////////////////////////////////////////
-using System;
-using Pvr_UnitySDKAPI;
+﻿using Pvr_UnitySDKAPI;
 using UnityEngine;
 
-public class Pvr_UnitySDKSensor 
+public class Pvr_UnitySDKSensor
 {
-
-    public  Pvr_UnitySDKSensor()
+    public Pvr_UnitySDKSensor()
     {
         Init();
     }
 
     /************************************    Properties  *************************************/
     #region Properties
-   
+
     public Pvr_UnitySDKPose SensorValvue;
 
     public bool HMDUsing = true;
@@ -44,10 +35,10 @@ public class Pvr_UnitySDKSensor
 
     /************************************   Public Interfaces **********************************/
     #region Public Interfaces
-        
+
     public delegate void Enter3DofModel();
     public static event Enter3DofModel Enter3DofModelEvent;
-  
+
     public delegate void Exit3DofModel();
     public static event Exit3DofModel Exit3DofModelEvent;
 
@@ -67,10 +58,10 @@ public class Pvr_UnitySDKSensor
     }
     public bool InitUnitySDKSensor()
     {
-       
+
         bool enable = false;
         try
-        {            
+        {
             if (Pvr_UnitySDKAPI.Sensor.UPvr_Init((int)sensorIndex) == 0)
                 enable = true;
         }
@@ -96,13 +87,13 @@ public class Pvr_UnitySDKSensor
                     if (Pvr_UnitySDKManager.SDK.HeadDofNum == HeadDofNum.SixDof)
                     {
                         enable = true;
-                        Pvr_UnitySDKManager.PVRNeck = false;
+                        Pvr_UnitySDKManager.SDK.PVRNeck = false;
                     }
-                } 
+                }
             }
             else
             {
-                Debug.LogWarning("This platform does NOT support 6 Dof ! " );
+                Debug.LogWarning("This platform does NOT support 6 Dof ! ");
             }
         }
         catch (System.Exception e)
@@ -112,7 +103,7 @@ public class Pvr_UnitySDKSensor
         }
         return enable;
     }
-  
+
     public bool StartUnitySDKSensor()
     {
         bool enable = false;
@@ -164,7 +155,7 @@ public class Pvr_UnitySDKSensor
         }
         return enable;
     }
-	
+
     public bool ResetUnitySDKSensorAll()
     {
         bool enable = false;
@@ -183,8 +174,8 @@ public class Pvr_UnitySDKSensor
         }
         return enable;
     }
-    
-	
+
+
     public bool OptionalResetUnitySDKSensor(int resetRot, int resetPos)
     {
         bool enable = false;
@@ -213,7 +204,7 @@ public class Pvr_UnitySDKSensor
             float w = 0, x = 0, y = 0, z = 0, px = 0, py = 0, pz = 0;
             try
             {
-                int returns = Pvr_UnitySDKAPI.Sensor.UPvr_GetMainSensorState(ref x, ref y, ref z, ref w,  ref px, ref py, ref pz, ref fov, ref Pvr_UnitySDKManager.SDK.RenderviewNumber);
+                int returns = Pvr_UnitySDKAPI.Sensor.UPvr_GetMainSensorState(ref x, ref y, ref z, ref w, ref px, ref py, ref pz, ref fov, ref Pvr_UnitySDKManager.SDK.RenderviewNumber);
                 Pvr_UnitySDKManager.SDK.posStatus = Sensor.UPvr_Get6DofSensorQualityStatus();
                 PLOG.D("posStatus=" + Pvr_UnitySDKManager.SDK.posStatus);
                 if (returns == 0)
@@ -241,13 +232,13 @@ public class Pvr_UnitySDKSensor
                     Pvr_UnitySDKManager.SDK.EyeFov = fov;
                     enable = true;
 
-                    if (Pvr_UnitySDKManager.PVRNeck)
+                    if (Pvr_UnitySDKManager.SDK.PVRNeck)
                     {
                         UnityPosition = UnityQuaternion * Pvr_UnitySDKManager.SDK.neckOffset -
-                                         Pvr_UnitySDKManager.SDK.neckOffset;
+                                         Pvr_UnitySDKManager.SDK.neckOffset.y * Vector3.up;
                     }
                     else
-                    {
+                    {                      
                         UnityPosition = new Vector3(px * Pvr_UnitySDKManager.SDK.MovingRatios, py * Pvr_UnitySDKManager.SDK.MovingRatios, -pz * Pvr_UnitySDKManager.SDK.MovingRatios);
                     }
                     PLOG.D("PvrLog 6DoFHead" + "Rotation" + x + y + -z + -w + "Position" + px + py + -pz + "eulerAngles" + UnityQuaternion.eulerAngles);
@@ -264,7 +255,7 @@ public class Pvr_UnitySDKSensor
         }
         return enable;
     }
-   
+
     public bool GetUnitySDKPSensorState()
     {
         bool enable = false;
@@ -283,6 +274,4 @@ public class Pvr_UnitySDKSensor
     }
 
     #endregion
-
-
 }

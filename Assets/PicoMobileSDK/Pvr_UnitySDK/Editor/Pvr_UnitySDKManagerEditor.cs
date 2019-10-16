@@ -1,22 +1,21 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using Pvr_UnitySDKAPI;
+
 [CustomEditor(typeof(Pvr_UnitySDKManager))]
 public class Pvr_UnitySDKManagerEditor : Editor
 {
-
     public delegate void HeadDofChanged(string dof);
     public static event HeadDofChanged HeadDofChangedEvent;
 
-    static int QulityRtMass = 0; 
+    static int QulityRtMass = 0;
     public delegate void Change(int Msaa);
     public static event Change MSAAChange;
-
 
     public override void OnInspectorGUI()
     {
         GUI.changed = false;
-        
+
         GUIStyle firstLevelStyle = new GUIStyle(GUI.skin.label);
         firstLevelStyle.alignment = TextAnchor.UpperLeft;
         firstLevelStyle.fontStyle = FontStyle.Bold;
@@ -27,9 +26,9 @@ public class Pvr_UnitySDKManagerEditor : Editor
 
         GUILayout.Space(10);
         EditorGUILayout.LabelField("Current Build Platform", firstLevelStyle);
-        EditorGUILayout.LabelField( EditorUserBuildSettings.activeBuildTarget.ToString());
+        EditorGUILayout.LabelField(EditorUserBuildSettings.activeBuildTarget.ToString());
         GUILayout.Space(10);
-        
+
         EditorGUILayout.LabelField("RenderTexture Setting", firstLevelStyle);
         manager.RtAntiAlising = (RenderTextureAntiAliasing)EditorGUILayout.EnumPopup("RenderTexture Anti-Aliasing", manager.RtAntiAlising);
 #if UNITY_2018_3_OR_NEWER
@@ -43,20 +42,24 @@ public class Pvr_UnitySDKManagerEditor : Editor
         manager.DefaultRenderTexture = EditorGUILayout.Toggle("Use Default RenderTexture", manager.DefaultRenderTexture);
         if (!manager.DefaultRenderTexture)
         {
-            //manager.RtLevel = (RenderTextureLevel)EditorGUILayout.EnumPopup("    RenderTexture Level", manager.RtLevel);
             manager.RtSize = EditorGUILayout.Vector2Field("    RT Size", manager.RtSize);
-            //manager.RtScaleFactor = EditorGUILayout.FloatField("    RT ScaleFactor", manager.RtScaleFactor);
             EditorGUILayout.BeginVertical("box");
             EditorGUILayout.LabelField("Note:", firstLevelStyle);
             EditorGUILayout.LabelField("1.width & height must be larger than 0;");
-            EditorGUILayout.LabelField("2.the size of RT has a great influence on performance;"); 
+            EditorGUILayout.LabelField("2.the size of RT has a great influence on performance;");
             EditorGUILayout.EndVertical();
         }
 
         GUILayout.Space(10);
         EditorGUILayout.LabelField("Pose Settings", firstLevelStyle);
-        manager.HeadDofNum = (HeadDofNum) EditorGUILayout.EnumPopup("Head Pose", manager.HeadDofNum);
-        manager.HandDofNum = (HandDofNum)EditorGUILayout.EnumPopup("Hand Pose", manager.HandDofNum);
+        manager.HeadDofNum = (HeadDofNum)EditorGUILayout.EnumPopup("Head Pose", manager.HeadDofNum);
+        if (manager.HeadDofNum == HeadDofNum.ThreeDof)
+        {
+            manager.PVRNeck = EditorGUILayout.Toggle("Enable Neck Model", manager.PVRNeck);
+        }
+        else
+            manager.PVRNeck = false;
+       manager.HandDofNum = (HandDofNum)EditorGUILayout.EnumPopup("Hand Pose", manager.HandDofNum);
         manager.MovingRatios = EditorGUILayout.FloatField("Position ScaleFactor", manager.MovingRatios);
         manager.SixDofRecenter = EditorGUILayout.Toggle("Enable 6Dof Position Reset", manager.SixDofRecenter);
 
@@ -76,7 +79,7 @@ public class Pvr_UnitySDKManagerEditor : Editor
         {
             manager.CustomFPS = EditorGUILayout.IntField("    FPS", manager.CustomFPS);
         }
-        
+        manager.Monoscopic = EditorGUILayout.Toggle("Use Monoscopic", manager.Monoscopic);
         if (GUI.changed)
         {
             QulityRtMass = (int)Pvr_UnitySDKManager.SDK.RtAntiAlising;
@@ -88,7 +91,7 @@ public class Pvr_UnitySDKManagerEditor : Editor
             {
                 MSAAChange(QulityRtMass);
             }
-            var headDof = (int) manager.HeadDofNum;
+            var headDof = (int)manager.HeadDofNum;
             if (HeadDofChangedEvent != null)
             {
                 if (headDof == 0)
@@ -99,7 +102,7 @@ public class Pvr_UnitySDKManagerEditor : Editor
                 {
                     HeadDofChangedEvent("6dof");
                 }
-                
+
             }
             EditorUtility.SetDirty(manager);
 #if !UNITY_5_2

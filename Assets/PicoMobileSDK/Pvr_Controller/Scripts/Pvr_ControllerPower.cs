@@ -4,7 +4,6 @@ using Pvr_UnitySDKAPI;
 
 public class Pvr_ControllerPower : MonoBehaviour
 {
-
     [SerializeField]
     private Material power1;
     [SerializeField]
@@ -33,7 +32,7 @@ public class Pvr_ControllerPower : MonoBehaviour
         variety = transform.GetComponentInParent<Pvr_ControllerModuleInit>().Variety;
         currentDevice = transform.GetComponentInParent<Pvr_ControllerVisual>().currentDevice;
     }
-    // Update is called once per frame
+
     void Update()
     {
         RefreshPower(variety == ControllerVariety.Controller0

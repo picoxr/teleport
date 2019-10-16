@@ -1,11 +1,4 @@
-﻿///////////////////////////////////////////////////////////////////////////////
-// Copyright 2015-2017  Pico Technology Co., Ltd. All Rights Reserved.
-// File: Controller
-// Author: Yangel.Yan
-// Date:  2017/01/11
-// Discription: The Controller API 
-///////////////////////////////////////////////////////////////////////////////
-#if !UNITY_EDITOR
+﻿#if !UNITY_EDITOR
 #if UNITY_ANDROID
 #define ANDROID_DEVICE
 #elif UNITY_IPHONE
@@ -161,8 +154,7 @@ namespace Pvr_UnitySDKAPI
 
         /**************************** Public Static Funcations *******************************************/
 #region Public Static Funcation  
-
-        
+       
         public static Vector2 UPvr_GetTouchPadPosition(int hand)
         {
             switch (hand)
@@ -198,6 +190,7 @@ namespace Pvr_UnitySDKAPI
             }
             return ControllerState.Error;
         }
+
         /// <summary>
         /// Get the controller rotation data.
         /// </summary>
@@ -214,6 +207,7 @@ namespace Pvr_UnitySDKAPI
             }
             return new Quaternion(0, 0, 0, 1);
         }
+
         /// <summary>
         /// Get the controller position data.
         /// </summary>
@@ -230,6 +224,7 @@ namespace Pvr_UnitySDKAPI
             }
             return new Vector3(0, 0, 0);
         }
+
         /// <summary>
         /// Get the value of the trigger key 
         /// </summary>
@@ -246,6 +241,7 @@ namespace Pvr_UnitySDKAPI
             }
             return 0;
         }
+
         /// <summary>
         /// Get the power of the controller, neo power is 1-10, goblin/goblin2 power is 1-4.
         /// </summary>
@@ -260,6 +256,7 @@ namespace Pvr_UnitySDKAPI
             }
             return 0;
         }
+
         /// <summary>
         /// Get the sliding direction of the touchpad.
         /// </summary>
@@ -276,6 +273,7 @@ namespace Pvr_UnitySDKAPI
             }
             return SwipeDirection.No;
         }
+
         /// <summary>
         /// Get the click direction of the touchpad.
         /// </summary>
@@ -512,6 +510,7 @@ namespace Pvr_UnitySDKAPI
             }
             return false;
         }
+
         /// <summary>
         /// The service type that currently needs bind.
         /// </summary>
@@ -550,6 +549,7 @@ namespace Pvr_UnitySDKAPI
         {
             return Pvr_ControllerManager.controllerlink.IsEnbleTrigger();
         }
+
         /// <summary>
         ///Gets the controller type of the current connection.
         /// </summary>
@@ -558,6 +558,7 @@ namespace Pvr_UnitySDKAPI
         {
             return Pvr_ControllerManager.controllerlink.GetDeviceType();
         }
+
         /// <summary>
         /// Gets the current master hand for which 0/1.
         /// </summary>
@@ -566,6 +567,7 @@ namespace Pvr_UnitySDKAPI
         {
             return Pvr_ControllerManager.controllerlink.GetMainControllerIndex();
         }
+
         /// <summary>
         /// Set the current controller as the master controller.
         /// </summary>
@@ -573,6 +575,7 @@ namespace Pvr_UnitySDKAPI
         {
             Pvr_ControllerManager.controllerlink.SetMainController(hand);
         }
+
         /// <summary>
         /// Ability to obtain the current controller (3dof/6dof)
         /// </summary>
@@ -582,61 +585,73 @@ namespace Pvr_UnitySDKAPI
         {
             return Pvr_ControllerManager.controllerlink.GetControllerAbility(hand);
         }
+
         //get controller version
         public static string UPvr_GetControllerVersion()
         {
             return Pvr_ControllerManager.controllerlink.GetControllerVersion();
         }
+
         //Get version number deviceType: 0-station 1- controller 0 2- controller 1.
         public static void UPvr_GetDeviceVersion(int deviceType)
         {
             Pvr_ControllerManager.controllerlink.GetDeviceVersion(deviceType);
         }
+
         //Get the controller Sn number controllerSerialNum: 0- controller 0 1- controller 1.
         public static void UPvr_GetControllerSnCode(int controllerSerialNum)
         {
             Pvr_ControllerManager.controllerlink.GetControllerSnCode(controllerSerialNum);
         }
-        //Unlash the controller controllerSerialNum: 0- controller 0 1- controller 1.
+
+        //Unbind the controller: 0- controller 0 1- controller 1.
         public static void UPvr_SetControllerUnbind(int controllerSerialNum)
         {
             Pvr_ControllerManager.controllerlink.SetControllerUnbind(controllerSerialNum);
         }
+
         //Restart the station
         public static void UPvr_SetStationRestart()
         {
             Pvr_ControllerManager.controllerlink.SetStationRestart();
         }
+
         //Launch station OTA upgrade.
         public static void UPvr_StartStationOtaUpdate()
         {
             Pvr_ControllerManager.controllerlink.StartStationOtaUpdate();
         }
+
         //Launch controller ota upgrade mode: 1-rf upgrade communication module 2- upgrade STM32 module;ControllerSerialNum: 0- controller 0 1- controller 1.
         public static void UPvr_StartControllerOtaUpdate(int mode, int controllerSerialNum)
         {
             Pvr_ControllerManager.controllerlink.StartControllerOtaUpdate(mode, controllerSerialNum);
         }
+
         //Enter the pairing mode controllerSerialNum: 0- controller 0 1- controller 1.
         public static void UPvr_EnterPairMode(int controllerSerialNum)
         {
             Pvr_ControllerManager.controllerlink.EnterPairMode(controllerSerialNum);
         }
+
         //controller shutdown controllerSerialNum: 0- controller 0 1- controller 1.
         public static void UPvr_SetControllerShutdown(int controllerSerialNum)
         {
             Pvr_ControllerManager.controllerlink.SetControllerShutdown(controllerSerialNum);
         }
+
         // Retrieves the pairing status of the current station with 0- unpaired state 1- pairing.
         public static int UPvr_GetStationPairState()
         {
             return Pvr_ControllerManager.controllerlink.GetStationPairState();
         }
+
         //Get the upgrade of station ota.
         public static int UPvr_GetStationOtaUpdateProgress()
         {
             return Pvr_ControllerManager.controllerlink.GetStationOtaUpdateProgress();
         }
+
         //Get the Controller ota upgrade progress.
         //Normal 0-100
         //Exception 101: failed to receive a successful upgrade of id 102: the controller did not enter the upgrade status 103: upgrade interrupt exception.
@@ -644,25 +659,28 @@ namespace Pvr_UnitySDKAPI
         {
             return Pvr_ControllerManager.controllerlink.GetControllerOtaUpdateProgress();
         }
+
         //Also get the controller version number and SN number controllerSerialNum: 0- controller 0 1- controller 1.
         public static void UPvr_GetControllerVersionAndSN(int controllerSerialNum)
         {
             Pvr_ControllerManager.controllerlink.GetControllerVersionAndSN(controllerSerialNum);
         }
+
         //Gets the unique identifier of the controller.
         public static void UPvr_GetControllerUniqueID()
         {
             Pvr_ControllerManager.controllerlink.GetControllerUniqueID();
         }
+
         //Disconnect the station from the current pairing mode.
         public void UPvr_InterruptStationPairMode()
         {
             Pvr_ControllerManager.controllerlink.InterruptStationPairMode();
         }
-        
-        // <summary>
-        // Obtain the controller's gyroscope data.
-        // </summary>
+
+        /// <summary>
+        /// Get the controller AngularVelocity, Obtain the controller's gyroscope data.
+        /// </summary>
         public static Vector3 UPvr_GetAngularVelocity(int num)
         {
             Vector3 Aglr = new Vector3(0.0f, 0.0f, 0.0f);
@@ -674,7 +692,7 @@ namespace Pvr_UnitySDKAPI
             Aglr = new Vector3(Angulae[0], Angulae[1], Angulae[2]);
 #endif
             return Aglr;
-        }       
+        }
 
         public static Vector3 UPvr_GetAcceleration(int num)
         {
@@ -688,6 +706,7 @@ namespace Pvr_UnitySDKAPI
 #endif
             return Acc;
         }
+
         public static void UPvr_SetArmModelParameters(int hand, int gazeType, float elbowHeight, float elbowDepth, float pointerTiltAngle)
         {
 #if ANDROID_DEVICE || IOS_DEVICE
@@ -701,24 +720,28 @@ namespace Pvr_UnitySDKAPI
             Pvr_CalcArmModelParameters( headOrientation,  controllerOrientation, controllerPrimary);
 #endif
         }
+
         public static void UPvr_GetPointerPose( float[] rotation,  float[] position)
         {
 #if ANDROID_DEVICE || IOS_DEVICE
             Pvr_GetPointerPose(  rotation,  position);
 #endif
         }
+
         public static void UPvr_GetElbowPose( float[] rotation,  float[] position)
         {
 #if ANDROID_DEVICE || IOS_DEVICE
             Pvr_GetElbowPose(  rotation,   position);
 #endif
         }
+
         public static void UPvr_GetWristPose( float[] rotation,  float[] position)
         {
 #if ANDROID_DEVICE || IOS_DEVICE
             Pvr_GetWristPose(  rotation,  position);
 #endif
         }
+
         public static void UPvr_GetShoulderPose( float[] rotation,  float[] position)
         {
 #if ANDROID_DEVICE || IOS_DEVICE

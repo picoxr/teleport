@@ -18,12 +18,10 @@ public class InputManager : MonoBehaviour
         InitKeyBoard();
     }
 
-    // Use this for initialization
     void Start()
     {
     }
 
-    // Update is called once per frame
     void Update()
     {
 
@@ -31,9 +29,6 @@ public class InputManager : MonoBehaviour
 
     void InitKeyBoard()
     {
-        //绑定事件
-
-
         btnsName.Add("1");
         btnsName.Add("2");
         btnsName.Add("3");
@@ -86,8 +81,6 @@ public class InputManager : MonoBehaviour
         enter.SetActive(sb.Length > 0);
     }
 
-
-    //ButtonClickedEvent
     void OnClick(GameObject btnObj)
     {
         if (btnObj.name.Equals("Capslock"))

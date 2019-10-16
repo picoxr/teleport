@@ -1,10 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-// Copyright 2015-2017  Pico Technology Co., Ltd. All Rights 
-// File: Pvr_UnitySDKAPI
-// Author: AiLi.Shang
-// Date:  2017/01/11
-// Discription: The API Core funcation.Be fully careful of  Code modification
-///////////////////////////////////////////////////////////////////////////////
 #if !UNITY_EDITOR
 #if UNITY_ANDROID
 #define ANDROID_DEVICE
@@ -16,17 +9,14 @@
 #endif
 
 
-using UnityEngine;
-using System.Collections;
 using System;
 using System.Runtime.InteropServices;
+using UnityEngine;
 
 namespace Pvr_UnitySDKAPI
 {
-
     public enum GlobalIntConfigs
     {
-
         EYE_TEXTURE_RESOLUTION0,
         EYE_TEXTURE_RESOLUTION1,
         SEENSOR_COUNT,
@@ -40,7 +30,7 @@ namespace Pvr_UnitySDKAPI
         iShowFPS,
         SensorMode,
         LOGICFLOW,// 0 ,1 Viewer	
-        EYE_TEXTURE_RES_HIGH,    
+        EYE_TEXTURE_RES_HIGH,
         EYE_TEXTURE_RES_NORMAL,
         iCtrlModelLoadingPri
     };
@@ -54,6 +44,7 @@ namespace Pvr_UnitySDKAPI
         NECK_MODEL_Z,
         DISPLAY_REFRESH_RATE
     };
+
     public enum RenderTextureAntiAliasing
     {
         X_1 = 1,
@@ -61,6 +52,7 @@ namespace Pvr_UnitySDKAPI
         X_4 = 4,
         X_8 = 8,
     }
+
     public enum PlatForm
     {
         Android = 1,
@@ -68,7 +60,6 @@ namespace Pvr_UnitySDKAPI
         Win = 3,
         Notsupport = 4,
     }
-
 
     public enum RenderTextureDepth
     {
@@ -82,6 +73,7 @@ namespace Pvr_UnitySDKAPI
         Normal,
         High
     }
+
     public enum Sensorindex
     {
         Default = 0,
@@ -89,13 +81,12 @@ namespace Pvr_UnitySDKAPI
         SecondSensor = 2,
     }
 
-
     public enum Eye
     {
         LeftEye = 0,
         RightEye
     }
-    
+
     public enum HeadDofNum
     {
         ThreeDof,
@@ -128,36 +119,21 @@ namespace Pvr_UnitySDKAPI
     [StructLayout(LayoutKind.Sequential)]
     public struct Sensor
     {
-        #region Android
 #if ANDROID_DEVICE
-        //---------------------------------------so------------------------------------------------
-        public const string LibFileName = "Pvr_UnitySDK";      
-              
-        [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int Pvr_Enable6DofModule(bool enable);
-        [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int Pvr_OptionalResetSensor(int index, int resetRot, int resetPos);
-        //---------------------------------------so------------------------------------------------
-#endif
-        #endregion
-
-        #region IOS
-#if IOS_DEVICE
-        //---------------------------------------so------------------------------------------------
-		public const string LibFileName = "__Internal";
-		//---------------------------------------so------------------------------------------------
-#endif
-        #endregion
-
-        #region UNITY_EDITOR
-#if UNITY_EDITOR
+        public const string LibFileName = "Pvr_UnitySDK";
+#else
         public const string LibFileName = "Pvr_UnitySDK";
 #endif
-        #endregion
 
-#if !UNITY_STANDALONE_WIN
-        #region DllFuncation
+
+#if ANDROID_DEVICE
         [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pvr_Enable6DofModule(bool enable);
+
+        [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Pvr_OptionalResetSensor(int index, int resetRot, int resetPos);
+
+         [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int Pvr_Init(int index);
 
         [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
@@ -168,9 +144,9 @@ namespace Pvr_UnitySDKAPI
 
         [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int Pvr_ResetSensor(int index);
+
         [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int Pvr_ResetSensorAll(int index);
-
 
         [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int Pvr_GetSensorState(int index, ref float x, ref float y, ref float z, ref float w, ref float px, ref float py, ref float pz);
@@ -189,14 +165,16 @@ namespace Pvr_UnitySDKAPI
 
         [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int Pvr_GetSensorMagnet(int index, ref float x, ref float y, ref float z);
+
         [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int Pvr_Get6DofSensorQualityStatus();
+
         [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool Pvr_Get6DofSafePanelFlag();
-        #endregion
 #endif
-        #region Public Static Funcation
 
+
+        #region Public Funcation
         public static bool UPvr_Pvr_Get6DofSafePanelFlag()
         {
 #if ANDROID_DEVICE
@@ -225,10 +203,10 @@ namespace Pvr_UnitySDKAPI
 #endif
             if (platformType == 1)
             {
-#if UNITY_STANDALONE_WIN
-                return 0;
-#else
+#if ANDROID_DEVICE
                 return Pvr_GetPsensorState();
+#else
+                return 0;
 #endif
             }
             else
@@ -248,27 +226,27 @@ namespace Pvr_UnitySDKAPI
         }
         public static int UPvr_StartSensor(int index)
         {
-#if UNITY_STANDALONE_WIN
-            return 0;
-#else
+#if ANDROID_DEVICE
             return Pvr_StartSensor(index);
+#else
+            return 0;
 #endif
         }
         public static int UPvr_StopSensor(int index)
         {
-#if UNITY_STANDALONE_WIN
-            return 0;
-#else
+#if ANDROID_DEVICE
             return Pvr_StopSensor(index);
+#else
+            return 0;
 #endif
         }
         public static int UPvr_ResetSensor(int index)
         {
             Pvr_UnitySDKManager.SDK.resetBasePos = new Vector3();
-#if UNITY_STANDALONE_WIN
-            return 0;
-#else
+#if ANDROID_DEVICE
             return Pvr_ResetSensor(index);
+#else
+            return 0;
 #endif
         }
         public static int UPvr_OptionalResetSensor(int index, int resetRot, int resetPos)
@@ -281,53 +259,53 @@ namespace Pvr_UnitySDKAPI
         }
         public static int UPvr_GetSensorState(int index, ref float x, ref float y, ref float z, ref float w, ref float px, ref float py, ref float pz)
         {
-#if UNITY_STANDALONE_WIN
-            return 0;
-#else
+#if ANDROID_DEVICE
             return Pvr_GetSensorState(index, ref x, ref y, ref z, ref w, ref px, ref py, ref pz);
+#else
+            return 0;
 #endif
         }
         public static int UPvr_GetMainSensorState(ref float x, ref float y, ref float z, ref float w, ref float px, ref float py, ref float pz, ref float fov, ref int viewNumber)
         {
-#if UNITY_STANDALONE_WIN
-            return 0;
-#else
+#if ANDROID_DEVICE
             return Pvr_GetMainSensorState(ref x, ref y, ref z, ref w, ref px, ref py, ref pz, ref fov, ref viewNumber);
+#else
+            return 0;
 #endif
         }
 
         public static int UPvr_GetSensorAcceleration(int index, ref float x, ref float y, ref float z)
         {
-#if UNITY_STANDALONE_WIN
-            return 0;
-#else
+#if ANDROID_DEVICE
             return Pvr_GetSensorAcceleration(index, ref x, ref y, ref z);
+#else
+            return 0;
 #endif
         }
 
         public static int UPvr_GetSensorGyroscope(int index, ref float x, ref float y, ref float z)
         {
-#if UNITY_STANDALONE_WIN
-            return 0;
+#if ANDROID_DEVICE
+            return Pvr_GetSensorGyroscope(index, ref x, ref y, ref z);;
 #else
-            return Pvr_GetSensorGyroscope(index, ref x, ref y, ref z);
+            return 0;
 #endif
         }
 
         public static int UPvr_GetSensorMagnet(int index, ref float x, ref float y, ref float z)
         {
-#if UNITY_STANDALONE_WIN
-            return 0;
-#else
+#if ANDROID_DEVICE
             return Pvr_GetSensorMagnet(index, ref x, ref y, ref z);
+#else
+            return 0;
 #endif
         }
         public static int UPvr_Get6DofSensorQualityStatus()
         {
-#if UNITY_STANDALONE_WIN
-            return 0;
-#else
+#if ANDROID_DEVICE
             return Pvr_Get6DofSensorQualityStatus();
+#else
+            return 0;
 #endif
         }
         public static int UPvr_Enable6DofModule(bool enable)
@@ -397,11 +375,11 @@ namespace Pvr_UnitySDKAPI
         }
         public static int UPvr_ResetSensorAll(int index)
         {
-#if ANDROID_DEVICE               
+#if ANDROID_DEVICE
                 return Pvr_ResetSensorAll(index);   
 #endif
             return 0;
-        }  
+        }
         #endregion
 
     }
@@ -409,36 +387,21 @@ namespace Pvr_UnitySDKAPI
     [StructLayout(LayoutKind.Sequential)]
     public struct Render
     {
-        #region Android
 #if ANDROID_DEVICE
         public const string LibFileName = "Pvr_UnitySDK";
+#elif IOS_DEVICE
+		public const string LibFileName = "__Internal";
+#else
+        public const string LibFileName = "Pvr_UnitySDK";
+#endif
+
+#if ANDROID_DEVICE
         [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
 		private static extern void Pvr_ChangeScreenParameters(string model, int width, int height, double xppi, double yppi, double densityDpi );
+
 		[DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
 		private static extern int Pvr_SetRatio(float midH, float midV);
 
-#endif
-        #endregion
-
-        #region IOS
-#if IOS_DEVICE
-		public const string LibFileName = "__Internal";
-		[DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern void UnityRenderEventIOS(int eventType,int eventData);
-
-		[DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
-		private static extern int Pvr_SetRatioIOS(float midH, float midV);
-
-#endif
-        #endregion
-
-        #region UNITY_EDITOR
-#if UNITY_EDITOR
-        public const string LibFileName = "Pvr_UnitySDK";
-#endif
-        #endregion
-#if !UNITY_STANDALONE_WIN
-        #region DllFuncation
         [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int Pvr_SetPupillaryPoint(bool enable);
 
@@ -454,52 +417,87 @@ namespace Pvr_UnitySDKAPI
         [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int Pvr_GetFloatConfig(int configsenum, ref float res);
 
-        // StandTexture Overlay
         [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
         private static extern void Pvr_SetupLayerData(int layerIndex, int sideMask, int textureId, int textureType, int layerFlags);
 
         [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
         private static extern void Pvr_SetupLayerCoords(int layerIndex, int sideMask, float[] lowerLeft, float[] lowerRight, float[] upperLeft, float[] upperRight);
-        #endregion
+
+        // 2D Overlay
+        [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern void Pvr_SetOverlayModelViewMatrix(int texId, int eye, int layerIndex,
+                                                                 float m0, float m1, float m2, float m3,
+                                                                 float m4, float m5, float m6, float m7,
+                                                                 float m8, float m9, float m10, float m11,
+                                                                 float m12, float m13, float m14, float m15);
+
+        // Foveation
+        [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern void Pvr_SetFoveationParameters(int textureId, int previousId,
+                                                              float focalPointX, float focalPointY,
+                                                              float foveationGainX, float foveationGainY,
+                                                              float foveationArea, float foveationMinimum);
+
+        // ColorSpace
+        [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern void Pvr_SetColorspaceType(int colorspaceType);
+
+#elif IOS_DEVICE
+		[DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
+		public static extern void UnityRenderEventIOS(int eventType,int eventData);
+
+		[DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
+		private static extern int Pvr_SetRatioIOS(float midH, float midV);
+
 #endif
 
-        #region Public Static Funcation
-#if ANDROID_DEVICE
-		public static void UPvr_ChangeScreenParameters(string model, int width, int height, double xppi, double yppi, double densityDpi)
+
+        #region Public Funcation
+
+        public static void UPvr_ChangeScreenParameters(string model, int width, int height, double xppi, double yppi, double densityDpi)
 		{
+#if ANDROID_DEVICE
 			Pvr_ChangeScreenParameters(model,  width,  height,  xppi,  yppi, densityDpi );
-		}
 #endif
+        }
+
         public static int UPvr_SetRatio(float midH, float midV)
         {
 #if ANDROID_DEVICE
             return Pvr_SetRatio(midH, midV);
-#endif
-#if IOS_DEVICE
+#elif IOS_DEVICE
 			return Pvr_SetRatioIOS(midH, midV);
 #endif
             return 0;
         }
+
+        // Foveation
+        public static void UPvr_SetFoveationParameters(int textureId, int previousId, float focalPointX, float focalPointY, float foveationGainX, float foveationGainY, float foveationArea, float foveationMinimum)
+        {
+#if ANDROID_DEVICE
+            Pvr_SetFoveationParameters(textureId, previousId, focalPointX, focalPointY, foveationGainX, foveationGainY, foveationArea, foveationMinimum);
+#endif
+        }
         public static int UPvr_GetIntConfig(int configsenum, ref int res)
         {
-#if UNITY_STANDALONE_WIN
-            return 0;
-#else
+#if ANDROID_DEVICE
             return Pvr_GetIntConfig(configsenum, ref res);
+#else
+            return 0;
 #endif
         }
 
         public static int UPvr_GetFloatConfig(int configsenum, ref float res)
         {
-#if UNITY_STANDALONE_WIN
-            return 0;
-#else
+#if ANDROID_DEVICE
             return Pvr_GetFloatConfig(configsenum, ref res);
+#else
+            return 0;
 #endif
         }
         public static string UPvr_GetSupportHMDTypes()
         {
-#if !UNITY_STANDALONE_WIN
+#if ANDROID_DEVICE
             IntPtr ptr = Pvr_GetSupportHMDTypes();
             if (ptr != IntPtr.Zero)
             {
@@ -511,7 +509,7 @@ namespace Pvr_UnitySDKAPI
         }
         public static void UPvr_SetCurrentHMDType(string type)
         {
-#if !UNITY_STANDALONE_WIN
+#if ANDROID_DEVICE
             Pvr_SetCurrentHMDType(type);
 #endif
         }
@@ -527,7 +525,25 @@ namespace Pvr_UnitySDKAPI
         public static void UPvr_SetupLayerCoords(int layerIndex, int sideMask, float[] lowerLeft, float[] lowerRight, float[] upperLeft, float[] upperRight)
         {
 #if ANDROID_DEVICE
-            Pvr_SetupLayerCoords(layerIndex, sideMask, lowerLeft, lowerRight, upperLeft, upperRight);
+             Pvr_SetupLayerCoords(layerIndex, sideMask, lowerLeft, lowerRight, upperLeft, upperRight);
+#endif
+        }
+
+        public static void UPvr_SetOverlayModelViewMatrix(int texId, int eye, int layerIndex, Matrix4x4 MV)
+        {
+#if ANDROID_DEVICE
+            Pvr_SetOverlayModelViewMatrix(texId, eye, layerIndex,
+            MV.m00, MV.m01, MV.m02, MV.m03,
+            MV.m10, MV.m11, MV.m12, MV.m13,
+            MV.m20, MV.m21, MV.m22, MV.m23,
+            MV.m30, MV.m31, MV.m32, MV.m33);
+#endif
+        }
+
+        public static void UPvr_SetColorspaceType(int colorspaceType)
+        {
+#if ANDROID_DEVICE
+            Pvr_SetColorspaceType(colorspaceType);
 #endif
         }
         #endregion
@@ -537,24 +553,23 @@ namespace Pvr_UnitySDKAPI
     [StructLayout(LayoutKind.Sequential)]
     public struct System
     {
-        const string UnitySDKVersion = "2.7.7.7";
+#if ANDROID_DEVICE
+        public const string LibFileName = "Pvr_UnitySDK";
+#else
+        public const string LibFileName = "Pvr_UnitySDK";
+#endif
 
-        #region Android
+        private const string UnitySDKVersion = "2.7.9.4";
 
 #if ANDROID_DEVICE
-         //---------------------------------------so------------------------------------------------
-        public const string LibFileName = "Pvr_UnitySDK";
-		
 		[DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern void Pvr_SetInitActivity(IntPtr activity, IntPtr vrActivityClass);
-       
-        
-        /// <typeparam name="T"></typeparam>
-        /// <param name="result"></param>
-        /// <param name="jclass"></param>
-        /// <param name="name"></param>
-        /// <param name="args"></param>
-        /// <returns></returns>
+           
+        [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr Pvr_GetSDKVersion();      
+#endif
+
+        #region Public Funcation
         public static bool UPvr_CallStaticMethod<T>(ref T result, UnityEngine.AndroidJavaClass jclass, string name, params object[] args)
         {
             try
@@ -568,7 +583,8 @@ namespace Pvr_UnitySDKAPI
                 return false;
             }
         }
-        public  static bool UPvr_CallStaticMethod(UnityEngine.AndroidJavaObject jobj, string name, params object[] args)
+
+        public static bool UPvr_CallStaticMethod(UnityEngine.AndroidJavaObject jobj, string name, params object[] args)
         {
             try
             {
@@ -582,14 +598,7 @@ namespace Pvr_UnitySDKAPI
             }
         }
 
-        
-        /// <typeparam name="T"></typeparam>
-        /// <param name="result"></param>
-        /// <param name="jobj"></param>
-        /// <param name="name"></param>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        public  static bool UPvr_CallMethod<T>(ref T result, UnityEngine.AndroidJavaObject jobj, string name, params object[] args)
+        public static bool UPvr_CallMethod<T>(ref T result, UnityEngine.AndroidJavaObject jobj, string name, params object[] args)
         {
             try
             {
@@ -602,14 +611,8 @@ namespace Pvr_UnitySDKAPI
                 return false;
             }
         }
-       
-        /// <typeparam name="T"></typeparam>
-        /// <param name="result"></param>
-        /// <param name="jobj"></param>
-        /// <param name="name"></param>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        public  static bool UPvr_CallMethod(UnityEngine.AndroidJavaObject jobj, string name, params object[] args)
+
+        public static bool UPvr_CallMethod(UnityEngine.AndroidJavaObject jobj, string name, params object[] args)
         {
             try
             {
@@ -621,32 +624,8 @@ namespace Pvr_UnitySDKAPI
                 Debug.LogError(" Exception calling activity method " + name + ": " + e);
                 return false;
             }
-        }  
-#endif
-        #endregion
+        }
 
-        #region IOS
-#if IOS_DEVICE
-         //---------------------------------------so------------------------------------------------
-		public const string LibFileName = "__Internal";
-		
-#endif
-        #endregion
-
-        #region UNITY_EDITOR
-#if UNITY_EDITOR
-        public const string LibFileName = "Pvr_UnitySDK";
-#endif
-        #endregion
-
-#if !UNITY_STANDALONE_WIN
-        #region DllFuncation
-        [DllImport(LibFileName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr Pvr_GetSDKVersion();
-        #endregion
-#endif
-
-        #region Public Static Funcation
         public static string UPvr_GetSDKVersion()
         {
 #if ANDROID_DEVICE
@@ -686,15 +665,17 @@ namespace Pvr_UnitySDKAPI
             return serialNum;
         }
 
-#if ANDROID_DEVICE
+
         public static AndroidJavaObject UPvr_GetCurrentActivity()
         {
-            AndroidJavaObject currentActivity;
+            AndroidJavaObject currentActivity = null;
+#if ANDROID_DEVICE           
             UnityEngine.AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
             currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");          
+#endif
             return currentActivity;
         }
-#endif
+
 
         public static void UPvr_ShutDown()
         {
@@ -737,8 +718,6 @@ namespace Pvr_UnitySDKAPI
 
         public static bool UPvr_StartHomeKeyReceiver(string startreceivre)
         {
-
-
 #if ANDROID_DEVICE
             try
             {
@@ -812,7 +791,7 @@ namespace Pvr_UnitySDKAPI
 #endif
             return code;
         }
-        #endregion
+#endregion
 
         public static bool UPvr_checkDevice(string packagename)
         {
@@ -823,6 +802,5 @@ namespace Pvr_UnitySDKAPI
             return value;
         }
     }
-
 
 }

@@ -10,14 +10,13 @@ public class Pvr_TouchVisual : MonoBehaviour {
     public ControllerVariety variety;
 
     private MeshRenderer touchRenderer;
-    // Use this for initialization
+
     void Start () {
         variety = transform.GetComponentInParent<Pvr_ControllerModuleInit>().Variety;
         currentDevice = GetComponentInParent<Pvr_ControllerVisual>().currentDevice;
         touchRenderer = GetComponent<MeshRenderer>();
     }
 	
-	// Update is called once per frame
 	void Update ()
 	{
 	    ChangeEffects(variety == ControllerVariety.Controller0 ? 0 : 1);

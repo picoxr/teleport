@@ -1,11 +1,4 @@
-﻿///////////////////////////////////////////////////////////////////////////////
-// Copyright 2015-2017  Pico Technology Co., Ltd. All Rights Reserved.
-// File: Pvr_Controller
-// Author: Yangel.Yan
-// Date:  2017/01/11
-// Discription: The manager of using controller
-///////////////////////////////////////////////////////////////////////////////
-#if !UNITY_EDITOR
+﻿#if !UNITY_EDITOR
 #if UNITY_ANDROID
 #define ANDROID_DEVICE
 #elif UNITY_IPHONE
@@ -19,7 +12,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using Pvr_UnitySDKAPI;
 using System;
-using System.Runtime.Remoting.Messaging;
 
 public class Pvr_ControllerLink
 {
@@ -44,7 +36,7 @@ public class Pvr_ControllerLink
     public ControllerHand Controller0;
     public ControllerHand Controller1;
     public int platFormType = -1; //0 phone，1 Pico Neo DK，2 Pico Goblin 3 Pico Neo
-    public int trackingmode = -1; //ability 0:null,1:3dof,2:6dof 3:自定义
+    public int trackingmode = -1; //0:null,1:3dof,2:6dof 3:custom
     public int systemProp = -1;   //0：goblin1 1：goblin1 2:neo 3:goblin2
     public int enablehand6dofbyhead = -1;
     public bool switchHomeKey = true;
@@ -731,6 +723,7 @@ public class Pvr_ControllerLink
         PLOG.D("PvrLog GoblinControllerTriggerKey:" + key);
         return key;
     }
+
     //Acquisition of equipment temperature
     public int GetTemperature()
     {
@@ -741,6 +734,7 @@ public class Pvr_ControllerLink
         PLOG.I("PvrLog Temperature:" + value);
         return value;
     }
+
     //Get the device type
     public int GetDeviceType()
     {
@@ -751,6 +745,7 @@ public class Pvr_ControllerLink
         PLOG.I("PvrLog DeviceType:" + type);
         return type;
     }
+
     public string GetHummingBird2SN()
     {
         string type = "";

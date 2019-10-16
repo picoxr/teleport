@@ -1,11 +1,4 @@
-﻿///////////////////////////////////////////////////////////////////////////////
-// Copyright 2015-2017  Pico Technology Co., Ltd. All Rights Reserved.
-// File: Pvr_Controller
-// Author: Yangel.Yan
-// Date:  2017/01/11
-// Discription: The demo of using controller
-///////////////////////////////////////////////////////////////////////////////
-#if !UNITY_EDITOR
+﻿#if !UNITY_EDITOR
 #if UNITY_ANDROID
 #define ANDROID_DEVICE
 #elif UNITY_IPHONE
@@ -86,7 +79,7 @@ public class Pvr_Controller : MonoBehaviour
     {
         Pvr_ControllerManager.PvrServiceStartSuccessEvent -= ServiceStartSuccess;
         Pvr_ControllerManager.SetControllerAbilityEvent -= CheckControllerState;
-        Pvr_ControllerManager.ChangeMainControllerCallBackEvent += MainControllerChanged;
+        Pvr_ControllerManager.ChangeMainControllerCallBackEvent -= MainControllerChanged;
     }
 
     private void MainControllerChanged(string index)
@@ -162,7 +155,7 @@ public class Pvr_Controller : MonoBehaviour
     {
 #if UNITY_EDITOR
         Quaternion controllerData = new Quaternion();
-        controllerData = UpdateSimulatedFrameParams();
+        controllerData = UpdateSimulatedFrameParams();        
         if (controller0 != null)
             controller0.transform.localRotation = controllerData;
 #else
@@ -170,6 +163,7 @@ public class Pvr_Controller : MonoBehaviour
         {
             DoUpdateControler0();
             DoUpdateControler1();
+            UpdateControlloerRay();
         }
         else
         {
@@ -177,11 +171,12 @@ public class Pvr_Controller : MonoBehaviour
             {
                 DoUpdateControler0();
                 DoUpdateControler1();
+                UpdateControlloerRay();
             }
             else
             {
                 if (controller0 != null)
-                {
+                {                    
                     if (controller0is3dof)
                     {
                         DoUpdateControler0();
@@ -191,7 +186,7 @@ public class Pvr_Controller : MonoBehaviour
                         controller0.transform.localRotation = Controller.UPvr_GetControllerQUA(0);
                         controller0.transform.localPosition = Controller.UPvr_GetControllerPOS(0);
                     }
-                    
+                    UpdateControlloerRay(true, false);
                 }
                 if (controller1 != null)
                 {
@@ -204,7 +199,7 @@ public class Pvr_Controller : MonoBehaviour
                         controller1.transform.localRotation = Controller.UPvr_GetControllerQUA(1);
                         controller1.transform.localPosition = Controller.UPvr_GetControllerPOS(1);
                     }
-                    
+                    UpdateControlloerRay(false, true);
                 }
             }
         }
@@ -231,6 +226,21 @@ public class Pvr_Controller : MonoBehaviour
         SetArmParaToSo(offhand, (int)Gazetype, ElbowHeight, ElbowDepth, PointerTiltAngle);
         CalcArmModelfromSo(1);
         UpdateControllerDataSO(1);
+    }
+
+    private void UpdateControlloerRay(bool update0 = true, bool update1 = true)
+    {
+        if (!Pvr_ControllerManager.Instance.LengthAdaptiveRay)
+            return;
+
+        if(update0 && controller0 != null)
+        {
+            controller0.GetComponent<Pvr_ControllerModuleInit>().UpdateRay();
+        }
+        if (update1 && controller1 != null)
+        {
+            controller1.GetComponent<Pvr_ControllerModuleInit>().UpdateRay();
+        }
     }
 
     private float mouseX = 0;

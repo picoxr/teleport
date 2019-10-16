@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.EventSystems;
 
 public struct UIDraggableItemEventArgs
@@ -128,7 +127,6 @@ public class Pvr_UIDraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandle
         startCanvas = null;
     }
 
-
     protected virtual void OnEnable()
     {
         canvasGroup = GetComponent<CanvasGroup>();
@@ -138,7 +136,7 @@ public class Pvr_UIDraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandle
         }
         currentInputmodule = FindObjectOfType<Pvr_InputModule>();
     }
-    
+
     protected virtual Pvr_UIPointer GetPointer()
     {
         foreach (Pvr_UIPointer t in currentInputmodule.pointers)
@@ -182,5 +180,4 @@ public class Pvr_UIDraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandle
         return e;
     }
 
-    
 }

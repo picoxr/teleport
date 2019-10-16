@@ -68,11 +68,24 @@
     <meta-data android:name="com.pvr.instructionset" android:value="32" />
     <!--Whether the platform animation is displayed.-->
     <meta-data android:name="platform_logo" android:value="0" />
+    <!--<meta-data android:name="LoadingContent" android:value="@string/loading" />-->
+    <meta-data android:name="LoadingContent" android:resource="@string/loading" />
+    <meta-data android:name="loadingcolor" android:resource="@color/custom" />
+    <meta-data android:name="loadingtextsize" android:value="16" />
+    <meta-data android:name="loadingwidth" android:value="500" />
+    <!--loadingtext width-->
+    <meta-data android:name="loadingheight" android:value="100" />
+    <!--loadingtext height-->
+    <meta-data android:name="loadingmarquee" android:value="1" />
+    <!--0 no marquee 1 marquee-->
+    <meta-data android:name="bottommargin" android:value="100" />
+    <meta-data android:name="marqueecount" android:value="10" />
+    <meta-data android:name="loadingalign" android:value="left" />
     <meta-data android:name="platform_high" android:value="1" />
     <meta-data android:name="platform_sbf" android:value="-1" />
     <!--Set the Viewer platform msaa.-->
     <meta-data android:name="MSAA" android:value="2" />
-    <meta-data android:name="com.pvr.hmd.trackingmode" android:value="3dof" />
+    <meta-data android:name="com.pvr.hmd.trackingmode" android:value="6dof" />
     <meta-data android:name="isPUI" android:value="0" />
   </application>
 </manifest>
