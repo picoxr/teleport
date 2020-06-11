@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright  2015-2020 Pico Technology Co., Ltd. All Rights Reserved.
+
+
+using System;
 using UnityEngine;
 using System.Collections;
 using Pvr_UnitySDKAPI;
@@ -25,7 +28,6 @@ public class Pvr_ControllerModuleInit : MonoBehaviour
     [SerializeField]
     private GameObject controller;
     private int controllerDof = -1;
-    private int mainHand = 0;
     private bool moduleState = true;
 
     void Awake()
@@ -75,22 +77,22 @@ public class Pvr_ControllerModuleInit : MonoBehaviour
 
     private void RefreshRay()
     {
-        mainHand = Controller.UPvr_GetMainHandNess();
         if (Variety == ControllerVariety.Controller0)
         {
-            StartCoroutine(ShowOrHideRay(mainHand == 0 && Pvr_ControllerManager.controllerlink.controller0Connected));
+            StartCoroutine(ShowOrHideRay(0));
         }
         if (Variety == ControllerVariety.Controller1)
         {
-            StartCoroutine(ShowOrHideRay(mainHand == 1 && Pvr_ControllerManager.controllerlink.controller1Connected));
+            StartCoroutine(ShowOrHideRay(1));
         }
     }
-    private IEnumerator ShowOrHideRay(bool state)
+    private IEnumerator ShowOrHideRay(int id)
     {
         yield return null;
         yield return null;
         if (moduleState)
         {
+            var state = Controller.UPvr_GetMainHandNess() == id && Controller.UPvr_GetControllerState(id) == ControllerState.Connected;
             dot.SetActive(state);
             rayLine.SetActive(state);
         }

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright  2015-2020 Pico Technology Co., Ltd. All Rights Reserved.
+
+
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -27,7 +30,6 @@ public class Pvr_UIGraphicRaycaster : GraphicRaycaster
         s_RaycastResults.Clear();
     }
 
-    //[Pure]
     protected virtual void SetNearestRaycast(ref PointerEventData eventData, ref List<RaycastResult> resultAppendList, ref List<RaycastResult> raycastResults)
     {
         RaycastResult? nearestRaycast = null;
@@ -51,7 +53,6 @@ public class Pvr_UIGraphicRaycaster : GraphicRaycaster
         }
     }
 
-    //[Pure]
     protected virtual float GetHitDistance(Ray ray)
     {
         var hitDistance = float.MaxValue;
@@ -83,7 +84,6 @@ public class Pvr_UIGraphicRaycaster : GraphicRaycaster
         return hitDistance;
     }
 
-    //[Pure]
     protected virtual void Raycast(Canvas canvas, Camera eventCamera, Ray ray, ref List<RaycastResult> results)
     {
         var hitDistance = GetHitDistance(ray);

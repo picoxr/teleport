@@ -1,4 +1,7 @@
-﻿#if !UNITY_EDITOR
+﻿// Copyright  2015-2020 Pico Technology Co., Ltd. All Rights Reserved.
+
+
+#if !UNITY_EDITOR
 #if UNITY_ANDROID
 #define ANDROID_DEVICE
 #elif UNITY_IPHONE
@@ -87,18 +90,11 @@ public class DemoController : MonoBehaviour
 
     void OnClick(GameObject btnObj)
     {
-        if (Application.internetReachability == NetworkReachability.NotReachable)
-        {
-            GameObject.Find("MassageInfo").GetComponent<Text>().text = "{" +
-            "\"ret_code\":\"5000\",\n" +
-            "\"ret_msg\":\"NETWORK_ERROR\"" + "}";
-            return;
-        }
         switch (btnObj.name)
         {
             case "Login":
                 StartLoading();
-                PicoPaymentSDK.Login();
+                LoginSDK.Login();
                 break;
 
             case "PayOne":
@@ -125,7 +121,7 @@ public class DemoController : MonoBehaviour
 
             case "GetUserAPI":
                 StartLoading();
-                PicoPaymentSDK.GetUserAPI();
+                LoginSDK.GetUserAPI();
                 break;
 
         }

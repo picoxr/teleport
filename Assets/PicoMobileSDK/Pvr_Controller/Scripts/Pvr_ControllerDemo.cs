@@ -1,4 +1,11 @@
-﻿using System;
+﻿// Copyright  2015-2020 Pico Technology Co., Ltd. All Rights Reserved.
+
+
+#if !UNITY_EDITOR && UNITY_ANDROID 
+#define ANDROID_DEVICE
+#endif
+
+using System;
 using UnityEngine;
 using System.Collections;
 using Pvr_UnitySDKAPI;
@@ -12,8 +19,7 @@ public class Pvr_ControllerDemo : MonoBehaviour
     public GameObject cube;
 
     private Ray ray;
-    
-    public  GameObject currentController;
+    public GameObject currentController;
 
     private Transform lastHit;
     private Transform currentHit;
@@ -28,19 +34,26 @@ public class Pvr_ControllerDemo : MonoBehaviour
     GameObject referenceObj;
     public float rayDefaultLength = 4;
     private bool isHasController = false;
+    private bool headcontrolmode = false;
+    private RaycastHit hit;
+
     void Start()
     {
         ray = new Ray();
+        hit = new RaycastHit();
         if (Pvr_UnitySDKManager.SDK.isHasController)
         {
             Pvr_ControllerManager.PvrServiceStartSuccessEvent += ServiceStartSuccess;
             Pvr_ControllerManager.SetControllerStateChangedEvent += ControllerStateListener;
             Pvr_ControllerManager.ControllerStatusChangeEvent += CheckControllerStateForGoblin;
             isHasController = true;
-        }
-#if UNITY_EDITOR 
-        currentController = controller0;
+#if UNITY_EDITOR
+            HeadSetController.SetActive(false);
+            currentController = controller1;
+            controller1.transform.Find("dot").gameObject.SetActive(true);
+            controller1.transform.Find("ray_alpha").gameObject.SetActive(true);
 #endif
+        }
         referenceObj = new GameObject("ReferenceObj");
     }
 
@@ -62,7 +75,7 @@ public class Pvr_ControllerDemo : MonoBehaviour
 
             ray.direction = HeadSetController.transform.position - HeadSetController.transform.parent.parent.Find("Head").position;
             ray.origin = HeadSetController.transform.parent.parent.Find("Head").position;
-            RaycastHit hit;
+            
             if (Physics.Raycast(ray, out hit))
             {
                 if (HeadSetController.name == "SightPointer")
@@ -93,8 +106,9 @@ public class Pvr_ControllerDemo : MonoBehaviour
                         hit.transform.GetComponent<Renderer>().material = gazemat;
                 }
                 lastHit = hit.transform;
+#if UNITY_EDITOR
                 Debug.DrawLine(ray.origin, hit.point, Color.red);
-
+#endif
                 if (Pvr_ControllerManager.Instance.LengthAdaptiveRay)
                 {
                     HeadSetController.transform.position = hit.point;
@@ -138,7 +152,7 @@ public class Pvr_ControllerDemo : MonoBehaviour
             {
                 ray.direction = currentController.transform.Find("dot").position - currentController.transform.Find("start").position;
                 ray.origin = currentController.transform.Find("start").position;
-                RaycastHit hit;
+
                 if (Physics.Raycast(ray, out hit))
                 {
                     currentHit = hit.transform;
@@ -181,7 +195,9 @@ public class Pvr_ControllerDemo : MonoBehaviour
                         }
                     }
                     lastHit = hit.transform;
+#if UNITY_EDITOR
                     Debug.DrawLine(ray.origin, hit.point, Color.red);
+#endif
                     currentController.transform.Find("dot").position = hit.point;
                     if (Pvr_ControllerManager.Instance.LengthAdaptiveRay)
                     {
@@ -268,6 +284,26 @@ public class Pvr_ControllerDemo : MonoBehaviour
     private void CheckControllerStateForGoblin(string state)
     {
         HeadSetController.SetActive(!Convert.ToBoolean(Convert.ToInt16(state)));
+    }
+
+    public void SwitchControlMode()
+    {
+#if UNITY_EDITOR
+        if (headcontrolmode)
+        {
+            headcontrolmode = false;
+            HeadSetController.SetActive(false);
+            controller0.SetActive(true);
+            controller1.SetActive(true);
+        }
+        else
+        {
+            headcontrolmode = true;
+            HeadSetController.SetActive(true);
+            controller0.SetActive(false);
+            controller1.SetActive(false);
+        }
+#endif
     }
 
 }

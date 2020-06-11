@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿// Copyright  2015-2020 Pico Technology Co., Ltd. All Rights Reserved.
+
+
+using UnityEngine;
 using System.Collections;
 using Pvr_UnitySDKAPI;
 using UnityEngine.UI;
@@ -44,15 +47,14 @@ public class Pvr_ControllerPower : MonoBehaviour
     {
         switch (currentDevice)
         {
-
             case ControllerDevice.Neo2:
                 {
-                    if (Controller.UPvr_GetControllerPower(hand) > 0 && Controller.UPvr_GetControllerPower(hand) <= 10)
+                    if (Controller.UPvr_GetControllerPower(hand) > 0 && Controller.UPvr_GetControllerPower(hand) <= 15)
                     {
                         powerImage.sprite = power1;
                         powerImage.color = Color.red;
                     }
-                    else if (Controller.UPvr_GetControllerPower(hand) >= 11 &&
+                    else if (Controller.UPvr_GetControllerPower(hand) >= 16 &&
                              Controller.UPvr_GetControllerPower(hand) <= 20)
                     {
                         powerImage.sprite = power1;
@@ -93,12 +95,12 @@ public class Pvr_ControllerPower : MonoBehaviour
                 {
                     if (powerValue == 1)
                     {
-                        gameObject.SetActive(true);
+                        powerImage.enabled = true;
                     }
                     else
                     {
-                        gameObject.SetActive(Vector3.Distance(transform.parent.parent.parent.localPosition,
-                                                 Pvr_UnitySDKManager.SDK.HeadPose.Position) <= 0.35f);
+                        powerImage.enabled = Vector3.Distance(transform.parent.parent.parent.localPosition,
+                                                 Pvr_UnitySDKManager.SDK.HeadPose.Position) <= 0.35f;
                     }
                     if (powerValue != Controller.UPvr_GetControllerPower(hand))
                     {
@@ -159,12 +161,12 @@ public class Pvr_ControllerPower : MonoBehaviour
                     {
                         if (powerValue == 0)
                         {
-                            gameObject.SetActive(true);
+                            powerImage.enabled = true;
                         }
                         else
                         {
-                            gameObject.SetActive(Vector3.Distance(transform.parent.parent.parent.localPosition,
-                                                     Pvr_UnitySDKManager.SDK.HeadPose.Position) <= 0.35f);
+                            powerImage.enabled = Vector3.Distance(transform.parent.parent.parent.localPosition,
+                                                     Pvr_UnitySDKManager.SDK.HeadPose.Position) <= 0.35f;
                         }
                         if (powerValue != Controller.UPvr_GetControllerPower(0))
                         {
@@ -197,10 +199,6 @@ public class Pvr_ControllerPower : MonoBehaviour
                             }
                             powerValue = Controller.UPvr_GetControllerPower(0);
                         }
-                    }
-                    else
-                    {
-                        
                     }
                 }
                 break;

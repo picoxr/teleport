@@ -1,15 +1,14 @@
-#if !UNITY_EDITOR
-#if UNITY_ANDROID
+// Copyright  2015-2020 Pico Technology Co., Ltd. All Rights Reserved.
+
+
+#if !UNITY_EDITOR && UNITY_ANDROID 
 #define ANDROID_DEVICE
-#elif UNITY_IPHONE
-#define IOS_DEVICE
-#elif UNITY_STANDALONE_WIN
-#define WIN_DEVICE
-#endif
 #endif
 
 using System;
 using UnityEngine;
+using Pvr_UnitySDKAPI;
+using UnityEngine.Rendering;
 
 public class Pvr_UnitySDKRender
 {
@@ -19,11 +18,12 @@ public class Pvr_UnitySDKRender
         {
 
             ConnectToAndriod();
-            Debug.Log("Init Render Ability Success!");
+            PLOG.I("PvrLog Init Render Ability Success!");
             isInitrenderThread = false;
         }
         Init();
     }
+
     /************************************    Properties  *************************************/
     #region Properties
 #if ANDROID_DEVICE
@@ -48,24 +48,225 @@ public class Pvr_UnitySDKRender
 
     private bool isInitrenderThread = true;
     private string model;
-    int Headweartype;
     private Vector2 prefinger1 = new Vector2(0.0f, 0.0f);
     private Vector2 prefinger2 = new Vector2(0.0f, 0.0f);
     #endregion
 
     /************************************   Public Interfaces **********************************/
     #region       PublicInterfaces
+
+    public void ConnectToAndriod()
+    {
+#if ANDROID_DEVICE
+        try
+        {      
+            Debug.Log("PvrLog SDK Version :  " + Pvr_UnitySDKAPI.System.UPvr_GetSDKVersion().ToString() + "  Unity Script Version :" +  Pvr_UnitySDKAPI.System.UPvr_GetUnitySDKVersion().ToString());
+            UnityEngine.AndroidJavaClass unityPlayer = new UnityEngine.AndroidJavaClass("com.unity3d.player.UnityPlayer");
+            activity = unityPlayer.GetStatic<UnityEngine.AndroidJavaObject>("currentActivity");
+            javaVrActivityClass = new UnityEngine.AndroidJavaClass("com.psmart.vrlib.VrActivity");
+            javaserviceClass = new AndroidJavaClass("com.picovr.picovrlib.hummingbirdclient.UnityClient");
+			javaVrActivityLongReceiver = new UnityEngine.AndroidJavaClass("com.psmart.vrlib.HomeKeyReceiver");
+            javaSysActivityClass = new UnityEngine.AndroidJavaClass("com.psmart.aosoperation.SysActivity");
+            javaVrActivityClientClass = new UnityEngine.AndroidJavaClass("com.psmart.vrlib.PvrClient");
+			Pvr_UnitySDKAPI.System.Pvr_SetInitActivity(activity.GetRawObject(), javaVrActivityClass.GetRawClass());
+            model = javaVrActivityClass.CallStatic<string>("Pvr_GetBuildModel");
+
+            double[] parameters = new double[5];
+            Pvr_UnitySDKAPI.System.UPvr_CallStaticMethod(ref parameters, javaVrActivityClass, "getDPIParameters", activity);
+            int platformType = -1 ;
+            int enumindex = (int)Pvr_UnitySDKAPI.GlobalIntConfigs.PLATFORM_TYPE;
+            Pvr_UnitySDKAPI.Render.UPvr_GetIntConfig(enumindex,ref platformType);
+
+            string systemfps = "";
+            Pvr_UnitySDKAPI.System.UPvr_CallStaticMethod<string>(ref systemfps, javaserviceClass, "getSysproc", "persist.pvr.debug.appfps");
+            if(systemfps != "")
+                Pvr_UnitySDKManager.SDK.systemFPS = Convert.ToBoolean(Convert.ToInt16(systemfps));
+        
+            if (platformType == 0)
+            {
+                 Pvr_UnitySDKAPI.Render.UPvr_ChangeScreenParameters(model, (int)parameters[0], (int)parameters[1], parameters[2], parameters[3], parameters[4]);				 
+				 Screen.sleepTimeout = SleepTimeout.NeverSleep;
+            }
+            if (Pvr_UnitySDKAPI.System.UPvr_IsPicoActivity())
+            {
+                bool setMonoPresentation = Pvr_UnitySDKAPI.System.UPvr_SetMonoPresentation();
+                Debug.Log("ConnectToAndriod set monoPresentation success ?-------------" + setMonoPresentation.ToString());
+
+                bool isPresentationExisted = Pvr_UnitySDKAPI.System.UPvr_IsPresentationExisted();
+                Debug.Log("ConnectToAndriod presentation existed ?-------------" + isPresentationExisted.ToString());
+            }
+        
+        }
+        catch (AndroidJavaException e)
+        {
+            PLOG.E("ConnectToAndriod--catch" + e.Message);
+        }
+#endif
+        canConnecttoActivity = true;
+    }
+
     public void Init()
     {
         if (InitRenderAbility())
         {
-            Debug.Log("Init Render Ability Success!");
+            Debug.Log("PvrLog Init Render Ability Success!");
             isInitrenderThread = false;
         }
         else
-            Debug.LogError("Init Render Ability Failed!");
+            Debug.Log("PvrLog Init Render Ability Failed!");
     }
 
+    /************************************  Private Interfaces **********************************/
+    #region     Private Interfaces
+
+    private bool InitRenderAbility()
+    {
+        if (UpdateRenderParaFrame())
+        {
+            if (CreateEyeBuffer())
+            {
+                float separation = Pvr_UnitySDKAPI.System.UPvr_GetIPD();
+                Pvr_UnitySDKManager.SDK.leftEyeOffset = new Vector3(-separation / 2, 0, 0);
+                Pvr_UnitySDKManager.SDK.rightEyeOffset = new Vector3(separation / 2, 0, 0);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private bool UpdateRenderParaFrame()
+    {
+        Pvr_UnitySDKManager.SDK.EyeVFoV = GetEyeVFOV();
+        Pvr_UnitySDKManager.SDK.EyeHFoV = GetEyeHFOV();
+        Pvr_UnitySDKManager.SDK.EyesAspect = Pvr_UnitySDKManager.SDK.EyeHFoV / Pvr_UnitySDKManager.SDK.EyeVFoV;
+        return true;
+    }
+
+    private bool CreateEyeBuffer()
+    {
+        Vector2 resolution = GetEyeBufferResolution();
+        Pvr_UnitySDKAPI.System.UPvr_SetSinglePassDepthBufferWidthHeight((int)resolution.x, (int)resolution.y);       
+        Pvr_UnitySDKManager.SDK.eyeTextures = new RenderTexture[Pvr_UnitySDKManager.eyeTextureCount];
+
+        // eye buffer
+        for (int i = 0; i < Pvr_UnitySDKManager.eyeTextureCount; i++)
+        {
+            if (null == Pvr_UnitySDKManager.SDK.eyeTextures[i])
+            {
+                try
+                {
+                    ConfigureEyeBuffer(i, resolution);
+                }
+                catch (Exception e)
+                {
+                    PLOG.E("ConfigureEyeBuffer ERROR " + e.Message);
+                    throw;
+                }
+            }
+
+            if (!Pvr_UnitySDKManager.SDK.eyeTextures[i].IsCreated())
+            {
+                Pvr_UnitySDKManager.SDK.eyeTextures[i].Create();
+                Pvr_UnitySDKManager.SDK.eyeTextureIds[i] = Pvr_UnitySDKManager.SDK.eyeTextures[i].GetNativeTexturePtr().ToInt32();
+            }
+            Pvr_UnitySDKManager.SDK.eyeTextureIds[i] = Pvr_UnitySDKManager.SDK.eyeTextures[i].GetNativeTexturePtr().ToInt32();
+        }
+        return true;
+    }
+
+    public float GetEyeVFOV()
+    {
+        float fov = 102;
+        try
+        {
+            int enumindex = (int)Pvr_UnitySDKAPI.GlobalFloatConfigs.VFOV;
+            Pvr_UnitySDKAPI.Render.UPvr_GetFloatConfig(enumindex, ref fov);
+            if (fov <= 0)
+            {
+                fov = 102;
+            }
+        }
+        catch (System.Exception e)
+        {
+            PLOG.E("GetEyeVFOV ERROR! " + e.Message);
+            throw;
+        }
+
+        return fov;
+    }
+
+    public float GetEyeHFOV()
+    {
+        float fov = 102;
+        try
+        {
+            int enumindex = (int)Pvr_UnitySDKAPI.GlobalFloatConfigs.HFOV;
+            Pvr_UnitySDKAPI.Render.UPvr_GetFloatConfig(enumindex, ref fov);
+            if (fov <= 0)
+            {
+                fov = 102;
+            }
+        }
+        catch (System.Exception e)
+        {
+            PLOG.E("GetEyeHFOV ERROR! " + e.Message);
+            throw;
+        }
+
+        return fov;
+    }
+
+    private void ConfigureEyeBuffer(int eyeTextureIndex, Vector2 resolution)
+    {
+        int x = (int)resolution.x;
+        int y = (int)resolution.y;
+        Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex] = new RenderTexture(x, y, (int)Pvr_UnitySDKProjectSetting.GetProjectConfig().rtBitDepth, Pvr_UnitySDKProjectSetting.GetProjectConfig().rtFormat);
+        if (Pvr_UnitySDKManager.StereoRenderPath == StereoRenderingPathPico.MultiPass)
+        {
+            Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex].anisoLevel = 0;
+            Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex].antiAliasing = Mathf.Max(QualitySettings.antiAliasing, (int)Pvr_UnitySDKProjectSetting.GetProjectConfig().rtAntiAlising);
+            Debug.Log("MultiPass ConfigureEyeBuffer eyeTextureIndex " + eyeTextureIndex);
+        }
+        else if (Pvr_UnitySDKManager.StereoRenderPath == StereoRenderingPathPico.SinglePass)
+        {
+            Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex].useMipMap = false;
+            Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex].wrapMode = TextureWrapMode.Clamp;
+            Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex].filterMode = FilterMode.Bilinear;
+            Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex].anisoLevel = 1;
+            Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex].dimension = TextureDimension.Tex2DArray;
+            Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex].volumeDepth = 2;
+            Debug.Log("SinglePass ConfigureEyeBuffer eyeTextureIndex " + eyeTextureIndex);
+        }
+
+        Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex].Create();
+        if (Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex].IsCreated())
+        {
+            Pvr_UnitySDKManager.SDK.eyeTextureIds[eyeTextureIndex] = Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex].GetNativeTexturePtr().ToInt32();
+            Debug.Log("eyeTextureIndex : " + eyeTextureIndex.ToString());
+        }
+
+    }
+
+    public bool ReCreateEyeBuffer()
+    {
+        if (!Pvr_UnitySDKProjectSetting.GetProjectConfig().usedefaultRenderTexture)
+        {
+            for (int i = 0; i < Pvr_UnitySDKManager.eyeTextureCount; i++)
+            {
+                if (Pvr_UnitySDKManager.SDK.eyeTextures[i] != null)
+                {
+                    Pvr_UnitySDKManager.SDK.eyeTextures[i].Release();
+                }
+            }
+
+            Array.Clear(Pvr_UnitySDKManager.SDK.eyeTextures, 0, Pvr_UnitySDKManager.SDK.eyeTextures.Length);
+
+            return CreateEyeBuffer();
+        }
+
+        return false;
+    }
+    #endregion
 
     public void IssueRenderThread()
     {
@@ -83,14 +284,17 @@ public class Pvr_UnitySDKRender
 
             Pvr_UnitySDKPluginEvent.Issue(RenderEventType.InitRenderThread);
             isInitrenderThread = true;
-            Debug.Log("IssueRenderThread end");
+            if (Pvr_UnitySDKManager.StereoRendering != null)
+            {
+                Pvr_UnitySDKManager.StereoRendering.OnSDKRenderInited();
+            }
+            Debug.Log("PvrLog IssueRenderThread end");
         }
         else
         {
-            Debug.Log("IssueRenderThread  canConnecttoActivity = " + canConnecttoActivity);
+            PLOG.I("PvrLog IssueRenderThread  canConnecttoActivity = " + canConnecttoActivity);
         }
     }
-
 
     private void AutoAdpatForPico1s()
     {
@@ -106,12 +310,12 @@ public class Pvr_UnitySDKRender
         prefinger2 = finger2;
     }
 
-    public Vector2 GetEyeBufferResolution()
+    public static Vector2 GetEyeBufferResolution()
     {
         Vector2 eyeBufferResolution;
         int w = 1024;
         int h = 1024;
-        if (Pvr_UnitySDKManager.SDK.DefaultRenderTexture)
+        if (Pvr_UnitySDKProjectSetting.GetProjectConfig().usedefaultRenderTexture)
         {
             try
             {
@@ -122,229 +326,27 @@ public class Pvr_UnitySDKRender
             }
             catch (System.Exception e)
             {
-                Debug.LogError("GetEyeBufferResolution ERROR! " + e.Message);
+                PLOG.E("GetEyeBufferResolution ERROR! " + e.Message);
                 throw;
             }
         }
         else
         {
-            w = (int)(Pvr_UnitySDKManager.SDK.RtSize.x * Pvr_UnitySDKManager.SDK.RtScaleFactor);
-            h = (int)(Pvr_UnitySDKManager.SDK.RtSize.y * Pvr_UnitySDKManager.SDK.RtScaleFactor);
+            w = (int)(Pvr_UnitySDKProjectSetting.GetProjectConfig().customRTSize.x * Pvr_UnitySDKManager.SDK.RtScaleFactor);
+            h = (int)(Pvr_UnitySDKProjectSetting.GetProjectConfig().customRTSize.y * Pvr_UnitySDKManager.SDK.RtScaleFactor);
         }
 
         eyeBufferResolution = new Vector2(w, h);
-        Debug.Log("eyeBufferResolution:" + eyeBufferResolution + ", scaleFactor: " + Pvr_UnitySDKManager.SDK.RtScaleFactor);
+        Debug.Log("DISFT Customize RenderTexture:" + eyeBufferResolution + ", scaleFactor: " + Pvr_UnitySDKManager.SDK.RtScaleFactor);
 
         return eyeBufferResolution;
     }
 
-
-    public float GetEyeFOV()
-    {
-        float fov = 102;
-        try
-        {
-            int enumindex = (int)Pvr_UnitySDKAPI.GlobalFloatConfigs.FOV;
-            Pvr_UnitySDKAPI.Render.UPvr_GetFloatConfig(enumindex, ref fov);
-            if (fov <= 0)
-            {
-                fov = 102;
-            }
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError("GetEyeFOV ERROR! " + e.Message);
-            throw;
-        }
-
-        return fov;
-    }
     public bool GetUsePredictedMatrix()
     {
         return true;
     }
 
-
-    public void ConnectToAndriod()
-    {
-#if ANDROID_DEVICE
-        try
-        {      
-            Debug.Log("SDK Version :  " + Pvr_UnitySDKAPI.System.UPvr_GetSDKVersion().ToString() + "  Unity Script Version :" +  Pvr_UnitySDKAPI.System.UPvr_GetUnitySDKVersion().ToString());
-            UnityEngine.AndroidJavaClass unityPlayer = new UnityEngine.AndroidJavaClass("com.unity3d.player.UnityPlayer");
-            activity = unityPlayer.GetStatic<UnityEngine.AndroidJavaObject>("currentActivity");
-            javaVrActivityClass = new UnityEngine.AndroidJavaClass("com.psmart.vrlib.VrActivity");
-            javaserviceClass = new AndroidJavaClass("com.picovr.picovrlib.hummingbirdclient.UnityClient");
-			javaVrActivityLongReceiver = new UnityEngine.AndroidJavaClass("com.psmart.vrlib.HomeKeyReceiver");
-            javaSysActivityClass = new UnityEngine.AndroidJavaClass("com.psmart.aosoperation.SysActivity");
-            javaVrActivityClientClass = new UnityEngine.AndroidJavaClass("com.psmart.vrlib.PvrClient");
-			Pvr_UnitySDKAPI.System.Pvr_SetInitActivity(activity.GetRawObject(), javaVrActivityClass.GetRawClass());
-            model = javaVrActivityClass.CallStatic<string>("Pvr_GetBuildModel");
-/*
-            if (model == "Falcon")
-            {                
-                Headweartype = (int)Pvr_UnitySDKConfigProfile.DeviceTypes.PicoNeo;
-                Debug.Log("Falcon : " + Headweartype.ToString());
-                Pvr_UnitySDKAPI.System.UPvr_CallStaticMethod(javaVrActivityClass, "initFalconDevice", activity);
-            }
-*/
-            double[] parameters = new double[5];
-            Pvr_UnitySDKAPI.System.UPvr_CallStaticMethod(ref parameters, javaVrActivityClass, "getDPIParameters", activity);
-            int platformType = -1 ;
-            int enumindex = (int)Pvr_UnitySDKAPI.GlobalIntConfigs.PLATFORM_TYPE;
-            Pvr_UnitySDKAPI.Render.UPvr_GetIntConfig(enumindex,ref platformType);
-
-            string systemfps = "";
-            Pvr_UnitySDKAPI.System.UPvr_CallStaticMethod<string>(ref systemfps, javaserviceClass, "getSysproc", "persist.pvr.debug.appfps");
-            if(systemfps != "")
-                Pvr_UnitySDKManager.SDK.systemFPS = Convert.ToBoolean(Convert.ToInt16(systemfps));
-        
-            if (platformType == 0)
-            {
-                 Pvr_UnitySDKAPI.Render.UPvr_ChangeScreenParameters(model, (int)parameters[0], (int)parameters[1], parameters[2], parameters[3], parameters[4]);				 
-				 Screen.sleepTimeout = SleepTimeout.NeverSleep;
-            }
-            //Pvr_UnitySDKAPI.Render.UPvr_ChangeHeadwear(Headweartype);
-        
-          
-        
-        }
-        catch (AndroidJavaException e)
-        {
-            Debug.LogError("ConnectToAndriod------------------------catch" + e.Message);
-        }
-#endif
-        canConnecttoActivity = true;
-    }
-
-    #endregion
-
-    /************************************  Private Interfaces **********************************/
-    #region     Private Interfaces
-    private bool UpdateRenderParaFrame()
-    {
-        Pvr_UnitySDKManager.SDK.EyeFov = GetEyeFOV();
-        return true;
-    }
-
-    private bool InitRenderAbility()
-    {
-        if (UpdateRenderParaFrame())
-        {
-            if (CreateEyeBuffer())
-            {
-                float separation = 0.0625f;
-                int enumindex = (int)Pvr_UnitySDKAPI.GlobalFloatConfigs.IPD;
-                if (0 != Pvr_UnitySDKAPI.Render.UPvr_GetFloatConfig(enumindex, ref separation))
-                {
-                    Debug.LogError("Cannot get ipd");
-                    separation = 0.0625f;
-                }
-                Pvr_UnitySDKManager.SDK.leftEyeOffset = new Vector3(-separation / 2, 0, 0);
-                Pvr_UnitySDKManager.SDK.rightEyeOffset = new Vector3(separation / 2, 0, 0);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void ConfigureEyeBuffer(int eyeTextureIndex, Vector2 resolution)
-    {
-        int x = (int)resolution.x;
-        int y = (int)resolution.y;
-        Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex] = new RenderTexture(x, y, (int)Pvr_UnitySDKManager.SDK.RtBitDepth, Pvr_UnitySDKManager.SDK.RtFormat);
-        Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex].anisoLevel = 0;
-        Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex].antiAliasing = Mathf.Max(QualitySettings.antiAliasing, (int)Pvr_UnitySDKManager.SDK.RtAntiAlising);
-
-        Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex].Create();
-        if (Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex].IsCreated())
-        {
-            Pvr_UnitySDKManager.SDK.eyeTextureIds[eyeTextureIndex] = Pvr_UnitySDKManager.SDK.eyeTextures[eyeTextureIndex].GetNativeTexturePtr().ToInt32();
-            Debug.Log("eyeTextureIndex : " + eyeTextureIndex.ToString());
-        }
-
-    }
-
-    private bool CreateEyeBuffer()
-    {
-        if (!Pvr_UnitySDKManager.SDK.IsViewerLogicFlow)
-        {
-            Vector2 resolution = GetEyeBufferResolution();
-            Pvr_UnitySDKManager.SDK.eyeTextures = new RenderTexture[Pvr_UnitySDKManager.eyeTextureCount];
-
-            // eye buffer
-            for (int i = 0; i < Pvr_UnitySDKManager.eyeTextureCount; i++)
-            {
-                if (null == Pvr_UnitySDKManager.SDK.eyeTextures[i])
-                {
-                    try
-                    {
-                        ConfigureEyeBuffer(i, resolution);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError("ConfigureEyeBuffer ERROR " + e.Message);
-                        throw;
-                    }
-                }
-
-                if (!Pvr_UnitySDKManager.SDK.eyeTextures[i].IsCreated())
-                {
-                    Pvr_UnitySDKManager.SDK.eyeTextures[i].Create();
-                    Pvr_UnitySDKManager.SDK.eyeTextureIds[i] = Pvr_UnitySDKManager.SDK.eyeTextures[i].GetNativeTexturePtr().ToInt32();
-                }
-                Pvr_UnitySDKManager.SDK.eyeTextureIds[i] = Pvr_UnitySDKManager.SDK.eyeTextures[i].GetNativeTexturePtr().ToInt32();
-            }
-
-
-            // overlay buffer
-            //Pvr_UnitySDKManager.SDK.overlayTextures = new RenderTexture[Pvr_UnitySDKManager.eyeTextureCount];
-            //int overlayNum = Pvr_UnitySDKManager.SDK.overlayCamNum * (Pvr_UnitySDKManager.eyeTextureCount / 2);
-            //for (int i = 0; i < overlayNum; i++)
-            //{
-            //    if (null == Pvr_UnitySDKManager.SDK.overlayTextures[i])
-            //    {
-            //        try
-            //        {
-            //            ConfigureOverlayBuffer(i, resolution);
-            //        }
-            //        catch (Exception e)
-            //        {
-            //            Debug.LogError("ConfigureOverlayBuffer ERROR " + e.Message);
-            //            throw;
-            //        }
-            //    }
-            //    if (!Pvr_UnitySDKManager.SDK.overlayTextures[i].IsCreated())
-            //    {
-            //        Pvr_UnitySDKManager.SDK.overlayTextures[i].Create();
-            //        Pvr_UnitySDKManager.SDK.overlayTextureIds[i] = Pvr_UnitySDKManager.SDK.overlayTextures[i].GetNativeTexturePtr().ToInt32();
-            //    }
-            //    Pvr_UnitySDKManager.SDK.overlayTextureIds[i] = Pvr_UnitySDKManager.SDK.overlayTextures[i].GetNativeTexturePtr().ToInt32();
-            //}
-        }
-        return true;
-    }
-
-
-    public bool ReCreateEyeBuffer()
-    {
-        if (!Pvr_UnitySDKManager.SDK.DefaultRenderTexture)
-        {
-            for (int i = 0; i < Pvr_UnitySDKManager.eyeTextureCount; i++)
-            {
-                if (Pvr_UnitySDKManager.SDK.eyeTextures[i] != null)
-                {
-                    Pvr_UnitySDKManager.SDK.eyeTextures[i].Release();
-                }
-            }
-
-            Array.Clear(Pvr_UnitySDKManager.SDK.eyeTextures, 0, Pvr_UnitySDKManager.SDK.eyeTextures.Length);
-
-            return CreateEyeBuffer();
-        }
-
-        return false;
-    }
     #endregion
 
 }

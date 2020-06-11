@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿// Copyright  2015-2020 Pico Technology Co., Ltd. All Rights Reserved.
+
+
+using UnityEngine;
 
 public class Pvr_UnitySDKPose
 {
@@ -15,9 +18,7 @@ public class Pvr_UnitySDKPose
     /************************************    Properties  *************************************/
     #region Properties
     public Vector3 Position { get; protected set; }
-
     public Quaternion Orientation { get; protected set; }
-
     public Matrix4x4 Matrix { get; protected set; }
     #endregion
 
@@ -40,6 +41,13 @@ public class Pvr_UnitySDKPose
         Matrix = Matrix4x4.TRS(position, orientation, Vector3.one);
     }
 
+    protected void Set(Matrix4x4 matrix)
+    {
+        Matrix = matrix;
+        Position = matrix.GetColumn(3);
+        Orientation = Quaternion.LookRotation(matrix.GetColumn(2), matrix.GetColumn(1));
+    }
+
     private Quaternion NormalizeQuaternion(ref Quaternion q)
     {
         float sum = 0;
@@ -56,11 +64,5 @@ public class Pvr_UnitySDKPose
         return q;
     }
 
-    protected void Set(Matrix4x4 matrix)
-    {
-        Matrix = matrix;
-        Position = matrix.GetColumn(3);
-        Orientation = Quaternion.LookRotation(matrix.GetColumn(2), matrix.GetColumn(1));
-    }
     #endregion  
 }

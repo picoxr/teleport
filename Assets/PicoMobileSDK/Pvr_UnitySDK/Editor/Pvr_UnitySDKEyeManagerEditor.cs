@@ -1,4 +1,9 @@
-﻿using UnityEditor;
+﻿// Copyright  2015-2020 Pico Technology Co., Ltd. All Rights Reserved.
+
+
+using Pvr_UnitySDKAPI;
+using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(Pvr_UnitySDKEyeManager))]
@@ -17,47 +22,26 @@ public class Pvr_UnitySDKEyeManagerEditor : Editor
 
         Pvr_UnitySDKEyeManager sdkEyeManager = (Pvr_UnitySDKEyeManager)target;
 
-        sdkEyeManager.trackEyes = EditorGUILayout.Toggle("Track Eyes", sdkEyeManager.trackEyes);
-        if(sdkEyeManager.trackEyes)
+        sdkEyeManager.EyeTracking = EditorGUILayout.Toggle("Eye Tracking", sdkEyeManager.EyeTracking);
+        if(sdkEyeManager.EyeTracking)
         {
             EditorGUILayout.BeginVertical("box");
             EditorGUILayout.LabelField("Note:", firstLevelStyle);
-            EditorGUILayout.LabelField("EyeTracking is supported only on the Neo2 Pro");
+            EditorGUILayout.LabelField("EyeTracking is supported only on the Neo2 Eye");
             EditorGUILayout.EndVertical();
         }
 
-        eFoveationLevel lastlevel = sdkEyeManager.foveationLevel;
-        eFoveationLevel newlevel = (eFoveationLevel)EditorGUILayout.EnumPopup("Foveation Level", sdkEyeManager.foveationLevel);
-        if (lastlevel != newlevel)
+        sdkEyeManager.FoveatedRendering = EditorGUILayout.Toggle("Foveated Rendering", sdkEyeManager.FoveatedRendering);
+        if (sdkEyeManager.FoveatedRendering)
         {
-            sdkEyeManager.foveationLevel = newlevel;
-            switch (sdkEyeManager.foveationLevel)
-            {
-                case eFoveationLevel.None:
-                    sdkEyeManager.FoveationGainValue = Vector2.zero;
-                    sdkEyeManager.FoveationAreaValue = 0.0f;
-                    sdkEyeManager.FoveationMinimumValue = 0.0f;
-                    break;
-                case eFoveationLevel.Low:
-                    sdkEyeManager.FoveationGainValue = new Vector2(2.0f, 2.0f);
-                    sdkEyeManager.FoveationAreaValue = 0.0f;
-                    sdkEyeManager.FoveationMinimumValue = 0.125f;
-                    break;
-                case eFoveationLevel.Med:
-                    sdkEyeManager.FoveationGainValue = new Vector2(3.0f, 3.0f);
-                    sdkEyeManager.FoveationAreaValue = 1.0f;
-                    sdkEyeManager.FoveationMinimumValue = 0.125f;
-                    break;
-                case eFoveationLevel.High:
-                    sdkEyeManager.FoveationGainValue = new Vector2(4.0f, 4.0f);
-                    sdkEyeManager.FoveationAreaValue = 2.0f;
-                    sdkEyeManager.FoveationMinimumValue = 0.125f;
-                    break;
-            }
+            EditorGUI.indentLevel = 1;
+            sdkEyeManager.FoveationLevel = (EFoveationLevel)EditorGUILayout.EnumPopup("Foveation Level", sdkEyeManager.FoveationLevel);
+            EditorGUI.indentLevel = 0;
         }
-        sdkEyeManager.FoveationGainValue = EditorGUILayout.Vector2Field("Foveation Gain Value", sdkEyeManager.FoveationGainValue);
-        sdkEyeManager.FoveationAreaValue = EditorGUILayout.FloatField("Foveation Area Value", sdkEyeManager.FoveationAreaValue);
-        sdkEyeManager.FoveationMinimumValue = EditorGUILayout.FloatField("Foveation Minimum Value", sdkEyeManager.FoveationMinimumValue);
+        else
+        {
+            sdkEyeManager.FoveationLevel = EFoveationLevel.None;
+        }
 
         EditorUtility.SetDirty(sdkEyeManager);
         if (GUI.changed)

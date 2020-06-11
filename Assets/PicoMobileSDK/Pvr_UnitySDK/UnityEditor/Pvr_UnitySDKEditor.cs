@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿// Copyright  2015-2020 Pico Technology Co., Ltd. All Rights Reserved.
 
+
+using UnityEngine;
 
 [ExecuteInEditMode]
 public class Pvr_UnitySDKEditor : MonoBehaviour
@@ -41,8 +43,38 @@ public class Pvr_UnitySDKEditor : MonoBehaviour
 
     #endregion Properties
 
+    /*************************************  Unity API ****************************************/
+    #region Unity API
+
+    void Awake()
+    {
+        InitEyePara();
+        InitEditorSensorPara();
+    }
+
+    void Update()
+    {
+        SimulateInput();
+        Pvr_UnitySDKManager.SDK.picovrTriggered = Pvr_UnitySDKManager.SDK.newPicovrTriggered;
+        Pvr_UnitySDKManager.SDK.newPicovrTriggered = false;
+    }
+    #endregion
+
     /************************************ Public Interface  *********************************/
     #region Public Interface
+
+    public void InitEyePara()
+    {
+        ComputeEyesFromProfile();
+        InitForEye(ref Pvr_UnitySDKManager.SDK.Eyematerial, ref Pvr_UnitySDKManager.SDK.Middlematerial);
+        FovAdjust();
+    }
+
+    private void InitEditorSensorPara()
+    {
+        Pvr_UnitySDKManager.SDK.picovrTriggered = Pvr_UnitySDKManager.SDK.newPicovrTriggered;
+        Pvr_UnitySDKManager.SDK.newPicovrTriggered = false;
+    }
 
     public static Matrix4x4 MakeProjection(float l, float t, float r, float b, float n, float f)
     {
@@ -88,12 +120,6 @@ public class Pvr_UnitySDKEditor : MonoBehaviour
 
     }
 
-    public void InitEyePara()
-    {
-        ComputeEyesFromProfile();
-        InitForEye(ref Pvr_UnitySDKManager.SDK.Eyematerial, ref Pvr_UnitySDKManager.SDK.Middlematerial);
-        FovAdjust();
-    }
     public bool ResetUnitySDKSensor()
     {
         mouseX = mouseY = mouseZ = 0;
@@ -131,7 +157,7 @@ public class Pvr_UnitySDKEditor : MonoBehaviour
 
     private void FovAdjust()
     {
-        Pvr_UnitySDKManager.SDK.EyeFov = 2 * Pvr_UnitySDKManager.SDK.pvr_UnitySDKConfig.device.devMaxFov.upper;
+        Pvr_UnitySDKManager.SDK.EyeVFoV = 2 * Pvr_UnitySDKManager.SDK.pvr_UnitySDKConfig.device.devMaxFov.upper;
     }
 
     private Rect RectAdjust(Rect eyeRect)
@@ -178,19 +204,13 @@ public class Pvr_UnitySDKEditor : MonoBehaviour
 
     }
 
-    private void InitEditorSensorPara()
-    {
-        Pvr_UnitySDKManager.SDK.picovrTriggered = Pvr_UnitySDKManager.SDK.newPicovrTriggered;
-        Pvr_UnitySDKManager.SDK.newPicovrTriggered = false;
-    }
-
     private void InitForEye(ref Material mat, ref Material mat1)
     {
         Shader shader = Shader.Find("Pvr_UnitySDK/Undistortion");
         Shader shader1 = Shader.Find("Pvr_UnitySDK/FillColor");
         if (shader == null || shader1 == null)
         {
-            Debug.LogError("Ths Shader Missing ！");
+            PLOG.E("Ths Shader Missing ！");
             return;
         }
         mat = new Material(shader);
@@ -204,20 +224,4 @@ public class Pvr_UnitySDKEditor : MonoBehaviour
     }
     #endregion
 
-    /*************************************  Unity API ****************************************/
-    #region Unity API
-
-    void Awake()
-    {
-        InitEyePara();
-        InitEditorSensorPara();
-    }
-
-    void Update()
-    {
-        SimulateInput();
-        Pvr_UnitySDKManager.SDK.picovrTriggered = Pvr_UnitySDKManager.SDK.newPicovrTriggered;
-        Pvr_UnitySDKManager.SDK.newPicovrTriggered = false;
-    }
-    #endregion
 }
