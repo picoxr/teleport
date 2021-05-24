@@ -1,0 +1,4 @@
+sceneSetups:
+- path: Assets/Scenes/Teleport.unity
+  isLoaded: 1
+  isActive: 1
